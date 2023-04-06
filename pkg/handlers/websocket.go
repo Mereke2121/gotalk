@@ -1,11 +1,12 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
 )
+
+var clients = make(map[*websocket.Conn]bool)
 
 func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 	upgrade := websocket.Upgrader{
@@ -20,6 +21,7 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 	}
 
 	conn.WriteJSON("websocket connected")
+	clients[conn] = true
 
 	go func() {
 		defer conn.Close()
@@ -30,7 +32,11 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 				log.Println(err)
 				return
 			}
-			conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("got message: %s", string(msg))))
+
+			// broadcast to all clients
+			for client := range clients {
+				client.WriteMessage(websocket.TextMessage, msg)
+			}
 		}
 	}()
 }

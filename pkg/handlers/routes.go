@@ -8,7 +8,7 @@ import (
 func (h *Handler) InitRoutes() http.Handler {
 	mux := chi.NewRouter()
 
-	mux.Get("/ws", h.wsConnection)
+	mux.Get("/ws/{id}", h.wsConnection)
 
 	return mux
 }

@@ -1,6 +1,10 @@
 package handlers
 
-type Handler struct{}
+import "github.com/gotalk/pkg/service"
+
+type Handler struct {
+	service *service.Service
+}
 
 func NewHandler() *Handler {
 	return &Handler{}

@@ -14,6 +14,10 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+	if user.UserName == "" || user.Email == "" || user.Password == "" {
+		log.Println("invalid body request")
+		return
+	}
 
 	err = h.service.AddUser(&user)
 	if err != nil {

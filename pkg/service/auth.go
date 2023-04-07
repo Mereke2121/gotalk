@@ -9,15 +9,18 @@ import (
 	"log"
 )
 
-var users = make(map[string]map[string]bool)
+var users = make(map[string]models.User)
 var salt = "39@#$rkf@dk!dwk$#"
 
 func (s *Service) AddUser(user *models.User) error {
 	hashedPassword := hashPassword(user.Password)
 
 	if _, ok := users[user.Email]; !ok {
-		users[user.Email] = make(map[string]bool)
-		users[user.Email][hashedPassword] = true
+		users[user.Email] = models.User{
+			UserName: user.UserName,
+			Email:    user.Email,
+			Password: hashedPassword,
+		}
 	} else {
 		return errors.New("you already authorized")
 	}
@@ -30,8 +33,10 @@ func (s *Service) AddUser(user *models.User) error {
 func (s *Service) Authenticate(user *models.User) (string, error) {
 	hashedPassword := hashPassword(user.Password)
 
-	if _, ok := users[user.Email][hashedPassword]; ok {
-		return "successfully authorized", nil
+	if _, ok := users[user.Email]; ok {
+		if users[user.Email].Password == hashedPassword {
+			return "authenticated successfully", nil
+		}
 	}
 
 	log.Println("users: ", users)

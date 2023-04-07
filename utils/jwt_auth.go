@@ -19,7 +19,7 @@ func CreateToken(roomId int) (string, error) {
 	})
 
 	// Подписываем токен нашим секретным ключом
-	tokenString, err := token.SignedString(secretKey)
+	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		return "", err
 	}
@@ -37,7 +37,7 @@ func VerifyToken(tokenString string) (int, error) {
 		}
 
 		// Возвращаем секретный ключ для проверки подписи
-		return secretKey, nil
+		return []byte(secretKey), nil
 	})
 	if err != nil {
 		return 0, err

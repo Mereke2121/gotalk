@@ -9,6 +9,7 @@ func (h *Handler) InitRoutes() http.Handler {
 	mux := chi.NewRouter()
 
 	mux.Get("/ws/{id}", h.wsConnection)
+	mux.Post("/ws/{id}/join", h.joinRoom)
 
 	return mux
 }

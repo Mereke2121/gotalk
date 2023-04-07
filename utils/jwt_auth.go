@@ -8,13 +8,14 @@ import (
 const secretKey = "dsljiowdm#@DJ!da"
 
 // Функция создания JWT токена
-func CreateToken(roomId int) (string, error) {
+func CreateToken(roomId int, email string) (string, error) {
 	// Устанавливаем время истечения токена
 	expirationTime := time.Now().Add(time.Hour)
 
 	// Создаем новый токен
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"roomId": roomId,
+		"email":  email,
 		"exp":    expirationTime.Unix(),
 	})
 
@@ -28,7 +29,7 @@ func CreateToken(roomId int) (string, error) {
 }
 
 // Функция проверки JWT токена
-func VerifyToken(tokenString string) (int, error) {
+func VerifyToken(tokenString string, paramType headerParam) (interface{}, error) {
 	// Парсим токен
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Проверяем метод подписи токена
@@ -49,10 +50,10 @@ func VerifyToken(tokenString string) (int, error) {
 		return 0, jwt.ErrInvalidKey
 	}
 
-	roomId, ok := claims["roomId"].(float64)
+	result, ok := claims[string(paramType)]
 	if !ok {
 		return 0, jwt.ErrInvalidKey
 	}
 
-	return int(roomId), nil
+	return result, nil
 }

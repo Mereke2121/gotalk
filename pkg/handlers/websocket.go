@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/gorilla/websocket"
 	"github.com/gotalk/utils"
@@ -14,12 +15,11 @@ var clients = make(map[int]map[*websocket.Conn]bool)
 
 func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 	// get body and header params
-	roomId := chi.URLParam(r, "id")
-	if roomId == "" {
-		log.Println("there is no provided room id")
+	roomId, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		log.Println("invalid room id")
 		return
 	}
-	id, _ := strconv.Atoi(roomId)
 
 	// get jwt token from header
 	token, err := getJWTToken(r)
@@ -29,7 +29,7 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// make authentication
-	err = authenticate(id, token)
+	email, err := authenticate(roomId, token)
 	if err != nil {
 		log.Println(err)
 		return
@@ -46,15 +46,15 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	if clients[id] == nil {
-		clients[id] = make(map[*websocket.Conn]bool)
+	if clients[roomId] == nil {
+		clients[roomId] = make(map[*websocket.Conn]bool)
 	}
-	clients[id][conn] = true
+	clients[roomId][conn] = true
 
 	// listen messages from websocket connection
 	conn.WriteMessage(websocket.TextMessage, []byte("websocket connected"))
 
-	go func(roomId int) {
+	go func(roomId int, userEmail string) {
 		defer conn.Close()
 
 		for {
@@ -64,23 +64,40 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			wsMessage := fmt.Sprintf("%s: %s", userEmail, string(msg))
 			// broadcast to all clients
 			for client := range clients[roomId] {
-				client.WriteMessage(websocket.TextMessage, msg)
+				client.WriteMessage(websocket.TextMessage, []byte(wsMessage))
 			}
 		}
-	}(id)
+	}(roomId, email)
 }
 
 func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
-	roomId := chi.URLParam(r, "id")
-	if roomId == "" {
-		log.Println("there is no provided room id")
+	roomId, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		log.Println("invalid room id")
 		return
 	}
-	id, _ := strconv.Atoi(roomId)
 
-	token, err := utils.CreateToken(id)
+	// get jwt token from header
+	userToken, err := getJWTToken(r)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	emailParam, err := utils.VerifyToken(userToken, utils.UserEmail)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	email, ok := emailParam.(string)
+	if !ok {
+		log.Println("invalid user email")
+	}
+
+	token, err := utils.CreateToken(roomId, email)
 	if err != nil {
 		log.Println(err)
 		return
@@ -98,15 +115,28 @@ func getJWTToken(r *http.Request) (string, error) {
 	return token, nil
 }
 
-func authenticate(roomId int, token string) error {
-	id, err := utils.VerifyToken(token)
+func authenticate(roomIdHeader int, token string) (string, error) {
+	roomParam, err := utils.VerifyToken(token, utils.RoomId)
 	if err != nil {
-		return err
+		return "", err
+	}
+	roomId, ok := roomParam.(int)
+	if !ok {
+		return "", errors.New("convert room id in jwt token from interface to int")
 	}
 
-	if roomId != id {
-		return errors.New("you are unauthorized")
+	if roomIdHeader != roomId {
+		return "", errors.New("you are unauthorized")
 	}
 
-	return nil
+	emailParam, err := utils.VerifyToken(token, utils.UserEmail)
+	if err != nil {
+		return "", err
+	}
+	email, ok := emailParam.(string)
+	if !ok {
+		return "", errors.New("convert user email in jwt token from interface to string")
+	}
+
+	return email, nil
 }

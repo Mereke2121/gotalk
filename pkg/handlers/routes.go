@@ -9,10 +9,10 @@ func (h *Handler) InitRoutes() http.Handler {
 	mux := chi.NewRouter()
 
 	mux.Post("/sign-up", h.signUp)
-	mux.Post("/sign-in", h.signIn)
+	mux.Post("/sign-in", h.signIn) // return jwt token which consists user email
 
-	mux.Get("/ws/{id}", h.wsConnection)
-	mux.Post("/ws/{id}/join", h.joinRoom)
+	mux.Get("/ws/{id}", h.wsConnection)   // user id, room id from jwt token
+	mux.Post("/ws/{id}/join", h.joinRoom) // for authorization inputs jwt token which consists email and room id
 
 	return mux
 }

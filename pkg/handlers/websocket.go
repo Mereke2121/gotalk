@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/gorilla/websocket"
+	"github.com/gotalk/models"
 	"github.com/gotalk/utils"
 	"log"
 	"net/http"
@@ -74,13 +76,14 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
-	roomId, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		log.Println("invalid room id")
+	var input *models.JoinRoomInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		log.Println(err)
 		return
 	}
+	roomId := input.RoomId
 
-	// get jwt token from header
+	// get user email from jwt token in request header
 	userToken, err := getJWTToken(r)
 	if err != nil {
 		log.Println(err)
@@ -95,6 +98,13 @@ func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
 	email, ok := emailParam.(string)
 	if !ok {
 		log.Println("invalid user email")
+	}
+
+	// authentication for chat room by room id and user email
+	err = h.service.AuthenticateInRoom(input, email)
+	if err != nil {
+		log.Println(err)
+		return
 	}
 
 	// create token for ws connection

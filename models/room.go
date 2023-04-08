@@ -3,7 +3,7 @@ package models
 type RoomInput struct {
 	RoomId   int    `json:"room_id"`
 	Password string `json:"password"`
-	Private  bool   `json:"is_private"`
+	Private  bool   `json:"private"`
 }
 
 type Room struct {
@@ -11,4 +11,9 @@ type Room struct {
 	Private      bool
 	Password     string
 	CreatorEmail string
+}
+
+type JoinRoomInput struct {
+	RoomId   int    `json:"room_id"`
+	Password string `json:"password"`
 }

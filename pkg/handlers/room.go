@@ -10,7 +10,7 @@ import (
 )
 
 func (h *Handler) createRoom(w http.ResponseWriter, r *http.Request) {
-	var room models.RoomInput
+	var room *models.RoomInput
 	err := json.NewDecoder(r.Body).Decode(&room)
 	if err != nil {
 		log.Println(err)

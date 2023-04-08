@@ -14,5 +14,7 @@ func (h *Handler) InitRoutes() http.Handler {
 	mux.Get("/ws/{id}", h.wsConnection)   // user id, room id from jwt token
 	mux.Post("/ws/{id}/join", h.joinRoom) // for authorization inputs jwt token which consists email and room id
 
+	mux.Post("/ws/room", h.createRoom)
+
 	return mux
 }

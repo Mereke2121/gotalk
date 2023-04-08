@@ -1,8 +1,8 @@
 package utils
 
-type headerParam string
+type HeaderParam string
 
 const (
-	UserEmail headerParam = "email"
-	RoomId    headerParam = "roomId"
+	UserEmail HeaderParam = "email"
+	RoomId    HeaderParam = "roomId"
 )

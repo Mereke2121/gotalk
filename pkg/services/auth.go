@@ -1,4 +1,4 @@
-package service
+package services
 
 import (
 	"crypto/hmac"
@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"github.com/gotalk/models"
+	"github.com/gotalk/utils"
 	"log"
 )
 
@@ -30,18 +31,24 @@ func (s *Service) AddUser(user *models.User) error {
 	return nil
 }
 
-func (s *Service) Authenticate(user *models.User) (string, error) {
+func (s *Service) Authenticate(user *models.Authentication) (string, error) {
 	hashedPassword := hashPassword(user.Password)
 
 	if _, ok := users[user.Email]; ok {
-		if users[user.Email].Password == hashedPassword {
-			return "authenticated successfully", nil
+		if users[user.Email].Password != hashedPassword {
+			return "", errors.New("unauthorized")
 		}
 	}
 
 	log.Println("users: ", users)
 
-	return "", errors.New("unauthorized")
+	// create jwt token and return in
+	var jwtFields []utils.JWTTokenField
+	jwtFields = append(jwtFields, utils.JWTTokenField{
+		Type:  utils.UserEmail,
+		Value: user.Email,
+	})
+	return utils.CreateToken(jwtFields)
 }
 
 func hashPassword(password string) string {

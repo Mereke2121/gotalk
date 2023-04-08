@@ -97,14 +97,25 @@ func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
 		log.Println("invalid user email")
 	}
 
-	token, err := utils.CreateToken(roomId, email)
+	// create token for ws connection
+	jwtFields := []utils.JWTTokenField{
+		{
+			Type:  utils.RoomId,
+			Value: roomId,
+		},
+		{
+			Type:  utils.UserEmail,
+			Value: email,
+		},
+	}
+	tokenWS, err := utils.CreateToken(jwtFields)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(token))
+	w.Write([]byte(tokenWS))
 }
 
 func getJWTToken(r *http.Request) (string, error) {
@@ -120,12 +131,12 @@ func authenticate(roomIdHeader int, token string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	roomId, ok := roomParam.(int)
+	roomId, ok := roomParam.(float64)
 	if !ok {
 		return "", errors.New("convert room id in jwt token from interface to int")
 	}
 
-	if roomIdHeader != roomId {
+	if roomIdHeader != int(roomId) {
 		return "", errors.New("you are unauthorized")
 	}
 

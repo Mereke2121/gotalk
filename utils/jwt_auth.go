@@ -7,19 +7,27 @@ import (
 
 const secretKey = "dsljiowdm#@DJ!da"
 
-// Функция создания JWT токена
-func CreateToken(roomId int, email string) (string, error) {
+type JWTTokenField struct {
+	Type  HeaderParam
+	Value interface{}
+}
+
+// CreateToken creates jwt token
+func CreateToken(tokenFields []JWTTokenField) (string, error) {
 	// Устанавливаем время истечения токена
 	expirationTime := time.Now().Add(time.Hour)
 
-	// Создаем новый токен
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"roomId": roomId,
-		"email":  email,
-		"exp":    expirationTime.Unix(),
-	})
+	// initialize jwt fields
+	jwtMap := jwt.MapClaims{}
+	jwtMap["exp"] = expirationTime.Unix()
+	for _, field := range tokenFields {
+		jwtMap[string(field.Type)] = field.Value
+	}
 
-	// Подписываем токен нашим секретным ключом
+	// create new token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtMap)
+
+	// signing with our secret key
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		return "", err
@@ -29,7 +37,7 @@ func CreateToken(roomId int, email string) (string, error) {
 }
 
 // Функция проверки JWT токена
-func VerifyToken(tokenString string, paramType headerParam) (interface{}, error) {
+func VerifyToken(tokenString string, paramType HeaderParam) (interface{}, error) {
 	// Парсим токен
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Проверяем метод подписи токена

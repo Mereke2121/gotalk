@@ -1,11 +1,13 @@
 package handlers
 
-import "github.com/gotalk/pkg/service"
+import "github.com/gotalk/pkg/services"
 
 type Handler struct {
-	service *service.Service
+	service *services.Service
 }
 
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(service *services.Service) *Handler {
+	return &Handler{
+		service: service,
+	}
 }

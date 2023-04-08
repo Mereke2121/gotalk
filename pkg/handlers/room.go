@@ -42,3 +42,32 @@ func (h *Handler) createRoom(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(strconv.Itoa(roomId)))
 }
+
+func (h *Handler) getAllRooms(w http.ResponseWriter, r *http.Request) {
+	// verify user
+	userToken, err := getJWTToken(r)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	_, err = utils.VerifyToken(userToken, utils.UserEmail)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	rooms, err := h.service.GetAllRooms()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	resultBody, err := json.Marshal(rooms)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(resultBody)
+}

@@ -33,3 +33,17 @@ func (s *Service) AuthenticateInRoom(input *models.JoinRoomInput, email string) 
 	}
 	return errors.Errorf("unauthorized for room id: %d", input.RoomId)
 }
+
+func (s *Service) GetAllRooms() ([]models.RoomResponse, error) {
+	var result []models.RoomResponse
+
+	for _, room := range rooms {
+		result = append(result, models.RoomResponse{
+			RoomId:       room.RoomId,
+			Private:      room.Private,
+			CreatorEmail: room.CreatorEmail,
+		})
+	}
+
+	return result, nil
+}

@@ -13,6 +13,12 @@ type Room struct {
 	CreatorEmail string
 }
 
+type RoomResponse struct {
+	RoomId       int    `json:"room_id"`
+	Private      bool   `json:"private"`
+	CreatorEmail string `json:"creator_email"`
+}
+
 type JoinRoomInput struct {
 	RoomId   int    `json:"room_id"`
 	Password string `json:"password"`

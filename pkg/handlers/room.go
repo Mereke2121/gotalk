@@ -6,6 +6,7 @@ import (
 	"github.com/gotalk/utils"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func (h *Handler) createRoom(w http.ResponseWriter, r *http.Request) {
@@ -32,11 +33,12 @@ func (h *Handler) createRoom(w http.ResponseWriter, r *http.Request) {
 		log.Println("invalid user email")
 	}
 
-	err = h.service.CreateRoom(room, email)
+	roomId, err := h.service.CreateRoom(room, email)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(strconv.Itoa(roomId)))
 }

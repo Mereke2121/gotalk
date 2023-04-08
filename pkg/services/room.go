@@ -7,14 +7,18 @@ import (
 
 var rooms = make(map[int]models.Room)
 
-func (s *Service) CreateRoom(input models.RoomInput, email string) error {
+func (s *Service) CreateRoom(input models.RoomInput, email string) (int, error) {
 	if _, ok := rooms[input.RoomId]; !ok {
-		rooms[input.RoomId] = models.Room{
+		room := models.Room{
 			RoomId:       input.RoomId,
 			Private:      input.Private,
 			CreatorEmail: email,
 		}
-		return nil
+		if input.Private {
+			room.Password = input.Password
+		}
+		rooms[input.RoomId] = room
+		return input.RoomId, nil
 	}
-	return errors.Errorf("room is already created; room id: %d", input.RoomId)
+	return 0, errors.Errorf("room is already created; room id: %d", input.RoomId)
 }

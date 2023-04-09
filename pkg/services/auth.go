@@ -10,14 +10,23 @@ import (
 	"log"
 )
 
-var users = make(map[string]models.User)
 var salt = "39@#$rkf@dk!dwk$#"
 
-func (s *Service) AddUser(user *models.User) error {
+type AuthService struct {
+	users map[string]*models.User
+}
+
+func NewAuthService() Authorization {
+	return &AuthService{
+		users: make(map[string]*models.User),
+	}
+}
+
+func (s *AuthService) AddUser(user *models.User) error {
 	hashedPassword := hashPassword(user.Password)
 
-	if _, ok := users[user.Email]; !ok {
-		users[user.Email] = models.User{
+	if _, ok := s.users[user.Email]; !ok {
+		s.users[user.Email] = &models.User{
 			UserName: user.UserName,
 			Email:    user.Email,
 			Password: hashedPassword,
@@ -26,23 +35,23 @@ func (s *Service) AddUser(user *models.User) error {
 		return errors.New("you already authorized")
 	}
 
-	log.Println("users: ", users)
+	log.Println("users: ", s.users)
 
 	return nil
 }
 
-func (s *Service) Authenticate(user *models.Authentication) (string, error) {
+func (s *AuthService) Authenticate(user *models.Authentication) (string, error) {
 	hashedPassword := hashPassword(user.Password)
 
-	if _, ok := users[user.Email]; ok {
-		if users[user.Email].Password != hashedPassword {
+	if _, ok := s.users[user.Email]; ok {
+		if s.users[user.Email].Password != hashedPassword {
 			return "", errors.New("unauthorized")
 		}
 	} else {
 		return "", errors.Errorf("there's no user by this email: %s", user.Email)
 	}
 
-	log.Println("users: ", users)
+	log.Println("users: ", s.users)
 
 	// create jwt token and return in
 	var jwtFields []utils.JWTTokenField

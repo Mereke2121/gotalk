@@ -5,10 +5,18 @@ import (
 	"github.com/pkg/errors"
 )
 
-var rooms = make(map[int]*models.Room)
+type RoomService struct {
+	rooms map[int]*models.Room
+}
 
-func (s *Service) CreateRoom(input *models.Room, email string) (int, error) {
-	if _, ok := rooms[input.RoomId]; !ok {
+func NewRoomService() Room {
+	return &RoomService{
+		rooms: make(map[int]*models.Room),
+	}
+}
+
+func (s *RoomService) CreateRoom(input *models.Room, email string) (int, error) {
+	if _, ok := s.rooms[input.RoomId]; !ok {
 		room := models.Room{
 			RoomId:       input.RoomId,
 			Private:      input.Private,
@@ -17,14 +25,14 @@ func (s *Service) CreateRoom(input *models.Room, email string) (int, error) {
 		if input.Private {
 			room.Password = input.Password
 		}
-		rooms[input.RoomId] = &room
+		s.rooms[input.RoomId] = &room
 		return input.RoomId, nil
 	}
 	return 0, errors.Errorf("room is already created; room id: %d", input.RoomId)
 }
 
-func (s *Service) UpdateRoom(input *models.UpdateRoomInput, roomId int, email string) error {
-	room, ok := rooms[roomId]
+func (s *RoomService) UpdateRoom(input *models.UpdateRoomInput, roomId int, email string) error {
+	room, ok := s.rooms[roomId]
 	if !ok {
 		return errors.Errorf("there is no room for by provided room id: %d", room.RoomId)
 	}
@@ -41,8 +49,8 @@ func (s *Service) UpdateRoom(input *models.UpdateRoomInput, roomId int, email st
 	return nil
 }
 
-func (s *Service) AuthenticateInRoom(input *models.JoinRoomInput, roomId int, email string) error {
-	room, ok := rooms[roomId]
+func (s *RoomService) AuthenticateInRoom(input *models.JoinRoomInput, roomId int, email string) error {
+	room, ok := s.rooms[roomId]
 	if !ok {
 		return errors.Errorf("there is no room by id: %d", roomId)
 	}
@@ -55,10 +63,10 @@ func (s *Service) AuthenticateInRoom(input *models.JoinRoomInput, roomId int, em
 	return errors.Errorf("unauthorized for room id: %d", room)
 }
 
-func (s *Service) GetAllRooms() ([]models.RoomResponse, error) {
+func (s *RoomService) GetAllRooms() ([]models.RoomResponse, error) {
 	var result []models.RoomResponse
 
-	for _, room := range rooms {
+	for _, room := range s.rooms {
 		result = append(result, models.RoomResponse{
 			RoomId:       room.RoomId,
 			Private:      room.Private,
@@ -69,8 +77,8 @@ func (s *Service) GetAllRooms() ([]models.RoomResponse, error) {
 	return result, nil
 }
 
-func (s *Service) GetRoomById(roomId int) (*models.RoomResponse, error) {
-	room, ok := rooms[roomId]
+func (s *RoomService) GetRoomById(roomId int) (*models.RoomResponse, error) {
+	room, ok := s.rooms[roomId]
 	if !ok {
 		return nil, errors.Errorf("there's no room for provided room id: %d", roomId)
 	}
@@ -81,8 +89,8 @@ func (s *Service) GetRoomById(roomId int) (*models.RoomResponse, error) {
 	}, nil
 }
 
-func (s *Service) DeleteRoomById(roomId int, email string) error {
-	room, ok := rooms[roomId]
+func (s *RoomService) DeleteRoomById(roomId int, email string) error {
+	room, ok := s.rooms[roomId]
 	if !ok {
 		return errors.Errorf("there is no room for provided room id: %d", roomId)
 	}
@@ -90,6 +98,6 @@ func (s *Service) DeleteRoomById(roomId int, email string) error {
 		return errors.New("you don't have access for delete")
 	}
 
-	delete(rooms, roomId)
+	delete(s.rooms, roomId)
 	return nil
 }

@@ -1,6 +1,9 @@
 package services
 
-import "github.com/gotalk/models"
+import (
+	"github.com/gotalk/models"
+	"github.com/gotalk/pkg/repository"
+)
 
 type Authorization interface {
 	AddUser(user *models.User) error
@@ -21,9 +24,9 @@ type Service struct {
 	Room
 }
 
-func NewService() *Service {
+func NewService(repo *repository.Repository) *Service {
 	return &Service{
-		Authorization: NewAuthService(),
-		Room:          NewRoomService(),
+		Authorization: NewAuthService(repo),
+		Room:          NewRoomService(repo),
 	}
 }

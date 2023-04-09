@@ -2,16 +2,19 @@ package services
 
 import (
 	"github.com/gotalk/models"
+	"github.com/gotalk/pkg/repository"
 	"github.com/pkg/errors"
 )
 
 type RoomService struct {
+	repo  *repository.Repository
 	rooms map[int]*models.Room
 }
 
-func NewRoomService() Room {
+func NewRoomService(repo *repository.Repository) Room {
 	return &RoomService{
 		rooms: make(map[int]*models.Room),
+		repo:  repo,
 	}
 }
 

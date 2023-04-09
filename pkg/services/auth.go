@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"github.com/gotalk/models"
+	"github.com/gotalk/pkg/repository"
 	"github.com/gotalk/utils"
 	"github.com/pkg/errors"
 	"log"
@@ -13,12 +14,14 @@ import (
 var salt = "39@#$rkf@dk!dwk$#"
 
 type AuthService struct {
+	repo  *repository.Repository
 	users map[string]*models.User
 }
 
-func NewAuthService() Authorization {
+func NewAuthService(repo *repository.Repository) Authorization {
 	return &AuthService{
 		users: make(map[string]*models.User),
+		repo:  repo,
 	}
 }
 

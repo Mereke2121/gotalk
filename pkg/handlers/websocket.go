@@ -56,23 +56,7 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 	// listen messages from websocket connection
 	conn.WriteMessage(websocket.TextMessage, []byte("websocket connected"))
 
-	go func(roomId int, userEmail string) {
-		defer conn.Close()
-
-		for {
-			_, msg, err := conn.ReadMessage()
-			if err != nil {
-				log.Println(err)
-				return
-			}
-
-			wsMessage := fmt.Sprintf("%s: %s", userEmail, string(msg))
-			// broadcast to all clients
-			for client := range clients[roomId] {
-				client.WriteMessage(websocket.TextMessage, []byte(wsMessage))
-			}
-		}
-	}(roomId, email)
+	go ListenWS(conn, roomId, email)
 }
 
 func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
@@ -81,33 +65,64 @@ func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	roomId := input.RoomId
+	roomId, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		log.Println("invalid room id")
+		return
+	}
 
 	// get user email from jwt token in request header
-	userToken, err := getJWTToken(r)
+	email, err := verifyUserEmail(r)
 	if err != nil {
 		log.Println(err)
 		return
-	}
-
-	emailParam, err := utils.VerifyToken(userToken, utils.UserEmail)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	email, ok := emailParam.(string)
-	if !ok {
-		log.Println("invalid user email")
 	}
 
 	// authentication for chat room by room id and user email
-	err = h.service.AuthenticateInRoom(input, email)
+	err = h.service.AuthenticateInRoom(input, roomId, email)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
 	// create token for ws connection
+	tokenWS, err := createToken(roomId, email)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(tokenWS))
+}
+
+func ListenWS(conn *websocket.Conn, roomId int, email string) {
+	defer conn.Close()
+
+	for {
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		wsMessage := fmt.Sprintf("%s: %s", email, string(msg))
+		// broadcast to all clients
+		for client := range clients[roomId] {
+			client.WriteMessage(websocket.TextMessage, []byte(wsMessage))
+		}
+	}
+}
+
+func getJWTToken(r *http.Request) (string, error) {
+	token := r.Header.Get("token")
+	if token == "" {
+		return "", errors.New("there is no provided token")
+	}
+	return token, nil
+}
+
+func createToken(roomId int, email string) (string, error) {
 	jwtFields := []utils.JWTTokenField{
 		{
 			Type:  utils.RoomId,
@@ -121,19 +136,9 @@ func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
 	tokenWS, err := utils.CreateToken(jwtFields)
 	if err != nil {
 		log.Println(err)
-		return
+		return "", err
 	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(tokenWS))
-}
-
-func getJWTToken(r *http.Request) (string, error) {
-	token := r.Header.Get("token")
-	if token == "" {
-		return "", errors.New("there is no provided token")
-	}
-	return token, nil
+	return tokenWS, nil
 }
 
 func authenticate(roomIdHeader int, token string) (string, error) {

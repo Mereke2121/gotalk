@@ -23,6 +23,25 @@ func (s *Service) CreateRoom(input *models.Room, email string) (int, error) {
 	return 0, errors.Errorf("room is already created; room id: %d", input.RoomId)
 }
 
+func (s *Service) UpdateRoom(input *models.Room, email string) error {
+	room, ok := rooms[input.RoomId]
+	if !ok {
+		return errors.Errorf("there is no room for by provided room id: %d", room.RoomId)
+	}
+	if room.CreatorEmail != email {
+		return errors.New("unauthorized")
+	}
+
+	rooms[input.RoomId] = models.Room{
+		RoomId:       input.RoomId,
+		Password:     input.Password,
+		Private:      input.Private,
+		CreatorEmail: email,
+	}
+
+	return nil
+}
+
 func (s *Service) AuthenticateInRoom(input *models.JoinRoomInput, roomId int, email string) error {
 	room, ok := rooms[roomId]
 	if !ok {

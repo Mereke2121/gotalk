@@ -31,6 +31,27 @@ func (h *Handler) createRoom(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(strconv.Itoa(roomId)))
 }
 
+func (h *Handler) updateRoomById(w http.ResponseWriter, r *http.Request) {
+	var room *models.Room
+	err := json.NewDecoder(r.Body).Decode(&room)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	// get user email from jwt token in header
+	email, err := verifyUserEmail(r)
+
+	err = h.service.UpdateRoom(room, email)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("successfully updated the room"))
+}
+
 func (h *Handler) getAllRooms(w http.ResponseWriter, r *http.Request) {
 	// verify user
 	_, err := verifyUserEmail(r)

@@ -20,6 +20,10 @@ func (h *Handler) createRoom(w http.ResponseWriter, r *http.Request) {
 
 	// get user email from jwt token in header
 	email, err := verifyUserEmail(r)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	roomId, err := h.service.CreateRoom(room, email)
 	if err != nil {
@@ -32,17 +36,22 @@ func (h *Handler) createRoom(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) updateRoomById(w http.ResponseWriter, r *http.Request) {
-	var room *models.Room
+	var room *models.UpdateRoomInput
 	err := json.NewDecoder(r.Body).Decode(&room)
 	if err != nil {
 		log.Println(err)
+		return
+	}
+	roomId, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		log.Println("invalid room id")
 		return
 	}
 
 	// get user email from jwt token in header
 	email, err := verifyUserEmail(r)
 
-	err = h.service.UpdateRoom(room, email)
+	err = h.service.UpdateRoom(room, roomId, email)
 	if err != nil {
 		log.Println(err)
 		return

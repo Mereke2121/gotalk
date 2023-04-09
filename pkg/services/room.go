@@ -5,7 +5,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var rooms = make(map[int]models.Room)
+var rooms = make(map[int]*models.Room)
 
 func (s *Service) CreateRoom(input *models.Room, email string) (int, error) {
 	if _, ok := rooms[input.RoomId]; !ok {
@@ -17,14 +17,14 @@ func (s *Service) CreateRoom(input *models.Room, email string) (int, error) {
 		if input.Private {
 			room.Password = input.Password
 		}
-		rooms[input.RoomId] = room
+		rooms[input.RoomId] = &room
 		return input.RoomId, nil
 	}
 	return 0, errors.Errorf("room is already created; room id: %d", input.RoomId)
 }
 
-func (s *Service) UpdateRoom(input *models.Room, email string) error {
-	room, ok := rooms[input.RoomId]
+func (s *Service) UpdateRoom(input *models.UpdateRoomInput, roomId int, email string) error {
+	room, ok := rooms[roomId]
 	if !ok {
 		return errors.Errorf("there is no room for by provided room id: %d", room.RoomId)
 	}
@@ -32,12 +32,11 @@ func (s *Service) UpdateRoom(input *models.Room, email string) error {
 		return errors.New("unauthorized")
 	}
 
-	rooms[input.RoomId] = models.Room{
-		RoomId:       input.RoomId,
-		Password:     input.Password,
-		Private:      input.Private,
-		CreatorEmail: email,
+	room.Private = input.Private
+	if input.Private {
+		room.Password = input.Password
 	}
+	room.Password = ""
 
 	return nil
 }
@@ -47,7 +46,10 @@ func (s *Service) AuthenticateInRoom(input *models.JoinRoomInput, roomId int, em
 	if !ok {
 		return errors.Errorf("there is no room by id: %d", roomId)
 	}
-	if !room.Private || email == room.CreatorEmail || room.Password == input.Password {
+	if !room.Private && input == nil {
+		return nil
+	}
+	if email == room.CreatorEmail || room.Password == input.Password {
 		return nil
 	}
 	return errors.Errorf("unauthorized for room id: %d", room)

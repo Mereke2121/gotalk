@@ -61,10 +61,13 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
 	var input *models.JoinRoomInput
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		log.Println(err)
-		return
+	if r.ContentLength > 0 {
+		if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+			log.Println(err)
+			return
+		}
 	}
+
 	roomId, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		log.Println("invalid room id")

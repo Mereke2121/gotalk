@@ -4,9 +4,9 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"errors"
 	"github.com/gotalk/models"
 	"github.com/gotalk/utils"
+	"github.com/pkg/errors"
 	"log"
 )
 
@@ -38,6 +38,8 @@ func (s *Service) Authenticate(user *models.Authentication) (string, error) {
 		if users[user.Email].Password != hashedPassword {
 			return "", errors.New("unauthorized")
 		}
+	} else {
+		return "", errors.Errorf("there's no user by this email: %s", user.Email)
 	}
 
 	log.Println("users: ", users)

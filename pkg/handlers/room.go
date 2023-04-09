@@ -115,6 +115,30 @@ func (h *Handler) getRoomById(w http.ResponseWriter, r *http.Request) {
 	w.Write(roomBody)
 }
 
+func (h *Handler) deleteRoomById(w http.ResponseWriter, r *http.Request) {
+	// verify user
+	email, err := verifyUserEmail(r)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	roomId, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		log.Println("invalid room id")
+		return
+	}
+
+	err = h.service.DeleteRoomById(roomId, email)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("delete successfully"))
+}
+
 func verifyUserEmail(r *http.Request) (string, error) {
 	userToken, err := getJWTToken(r)
 	if err != nil {

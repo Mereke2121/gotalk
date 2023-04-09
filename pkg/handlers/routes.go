@@ -16,6 +16,7 @@ func (h *Handler) InitRoutes() http.Handler {
 	mux.Get("/room", h.getAllRooms)
 	mux.Get("/room/{id}", h.getRoomById)
 	mux.Put("/room/{id}", h.updateRoomById)
+	mux.Delete("/room/{id}", h.deleteRoomById)
 	mux.Post("/room", h.createRoom)
 
 	// ws

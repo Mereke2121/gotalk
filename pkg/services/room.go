@@ -80,3 +80,16 @@ func (s *Service) GetRoomById(roomId int) (*models.RoomResponse, error) {
 		CreatorEmail: room.CreatorEmail,
 	}, nil
 }
+
+func (s *Service) DeleteRoomById(roomId int, email string) error {
+	room, ok := rooms[roomId]
+	if !ok {
+		return errors.Errorf("there is no room for provided room id: %d", roomId)
+	}
+	if room.CreatorEmail != email {
+		return errors.New("you don't have access for delete")
+	}
+
+	delete(rooms, roomId)
+	return nil
+}

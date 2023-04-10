@@ -27,8 +27,9 @@ func main() {
 		log.Fatal(err)
 		return
 	}
+	userCollection := client.Database("gotalk").Collection("users")
 
-	repo := repository.NewRepository(client)
+	repo := repository.NewRepository(userCollection)
 	service := services.NewService(repo)
 	handler := handlers.NewHandler(service)
 

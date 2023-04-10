@@ -19,18 +19,18 @@ func NewRoomService(repo *repository.Repository) Room {
 }
 
 func (s *RoomService) CreateRoom(input *models.Room, userId string) (int, error) {
-	if _, ok := s.rooms[input.RoomId]; !ok {
-		room := models.Room{
-			RoomId:        input.RoomId,
-			Private:       input.Private,
-			CreatoruserId: userId,
-		}
-		if input.Private {
-			room.Password = input.Password
-		}
-		s.rooms[input.RoomId] = &room
-		return input.RoomId, nil
-	}
+	//if _, ok := s.rooms[input.RoomId]; !ok {
+	//	room := models.Room{
+	//		RoomId:        input.RoomId,
+	//		Private:       input.Private,
+	//		CreatoruserId: userId,
+	//	}
+	//	if input.Private {
+	//		room.Password = input.Password
+	//	}
+	//	s.rooms[input.RoomId] = &room
+	//	return input.RoomId, nil
+	//}
 	return 0, errors.Errorf("room is already created; room id: %d", input.RoomId)
 }
 

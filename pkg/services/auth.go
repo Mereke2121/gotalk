@@ -28,17 +28,11 @@ func NewAuthService(repo *repository.Repository) Authorization {
 func (s *AuthService) AddUser(user *models.User) error {
 	hashedPassword := hashPassword(user.Password)
 
-	if _, ok := s.users[user.Email]; !ok {
-		s.users[user.Email] = &models.User{
-			UserName: user.UserName,
-			Email:    user.Email,
-			Password: hashedPassword,
-		}
-	} else {
-		return errors.New("you already authorized")
+	user.Password = hashedPassword
+	err := s.repo.AddUser(user)
+	if err != nil {
+		return err
 	}
-
-	log.Println("users: ", s.users)
 
 	return nil
 }

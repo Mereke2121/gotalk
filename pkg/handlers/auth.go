@@ -8,14 +8,14 @@ import (
 )
 
 func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
-	var user models.User
+	var user *models.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	err = h.service.AddUser(&user)
+	err = h.service.AddUser(user)
 	if err != nil {
 		log.Println(err)
 		return

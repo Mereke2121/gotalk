@@ -6,4 +6,5 @@ const (
 	UserEmail HeaderParam = "email"
 	RoomId    HeaderParam = "roomId"
 	UserName  HeaderParam = "username"
+	UserId    HeaderParam = "userId"
 )

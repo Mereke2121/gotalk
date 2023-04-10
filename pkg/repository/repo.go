@@ -46,6 +46,20 @@ func (r *Repository) AddUser(user *models.User) error {
 		return err
 	}
 
+	//TODO: remove log
 	log.Println("inserted user with id: ", res.InsertedID)
 	return nil
+}
+
+func (r *Repository) GetUserId(user *models.Authentication) (string, error) {
+	var mongoUser *models.MongoUser
+	err := r.usersCollection.FindOne(context.Background(), user).Decode(&mongoUser)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return "", errors.New("you haven't authorized")
+		}
+		return "", err
+	}
+
+	return mongoUser.Id.Hex(), nil
 }

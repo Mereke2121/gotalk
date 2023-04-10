@@ -11,12 +11,12 @@ type Authorization interface {
 }
 
 type Room interface {
-	CreateRoom(input *models.Room, email string) (int, error)
-	UpdateRoom(input *models.UpdateRoomInput, roomId int, email string) error
-	AuthenticateInRoom(input *models.JoinRoomInput, roomId int, email string) error
+	CreateRoom(input *models.Room, userId string) (int, error)
+	UpdateRoom(input *models.UpdateRoomInput, roomId int, userId string) error
+	AuthenticateInRoom(input *models.JoinRoomInput, roomId int, userId string) error
 	GetAllRooms() ([]models.RoomResponse, error)
 	GetRoomById(roomId int) (*models.RoomResponse, error)
-	DeleteRoomById(roomId int, email string) error
+	DeleteRoomById(roomId int, userId string) error
 }
 
 type Service struct {

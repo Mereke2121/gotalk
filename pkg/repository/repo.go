@@ -10,12 +10,18 @@ type Authorization interface {
 	GetUserId(user *models.Authentication) (string, error)
 }
 
-type Repository struct {
-	Authorization
+type Room interface {
+	AddRoom(input *models.Room, userId string) (int, error)
 }
 
-func NewRepository(userCollection *mongo.Collection) *Repository {
+type Repository struct {
+	Authorization
+	Room
+}
+
+func NewRepository(userCollection, roomCollection *mongo.Collection) *Repository {
 	return &Repository{
 		Authorization: NewUserRepository(userCollection),
+		Room:          NewRoomRepository(roomCollection),
 	}
 }

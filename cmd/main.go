@@ -28,8 +28,9 @@ func main() {
 		return
 	}
 	userCollection := client.Database("gotalk").Collection("users")
+	roomCollection := client.Database("gotalk").Collection("rooms")
 
-	repo := repository.NewRepository(userCollection)
+	repo := repository.NewRepository(userCollection, roomCollection)
 	service := services.NewService(repo)
 	handler := handlers.NewHandler(service)
 

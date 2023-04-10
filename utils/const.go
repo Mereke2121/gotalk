@@ -3,7 +3,6 @@ package utils
 type HeaderParam string
 
 const (
-	RoomId   HeaderParam = "roomId"
-	UserName HeaderParam = "username"
-	UserId   HeaderParam = "userId"
+	RoomId HeaderParam = "roomId"
+	UserId HeaderParam = "userId"
 )

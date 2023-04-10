@@ -1,8 +1,12 @@
 package repository
 
 import (
+	"context"
 	"github.com/gotalk/models"
+	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type RoomRepository struct {
@@ -15,6 +19,29 @@ func NewRoomRepository(roomCollection *mongo.Collection) *RoomRepository {
 	}
 }
 
-func (r *RoomRepository) AddRoom(input *models.Room, userId string) (int, error) {
-	return 0, nil
+func (r *RoomRepository) AddRoom(input *models.Room) (int, error) {
+	// remove password if chat room is public
+	if !input.Private {
+		input.Password = ""
+	}
+
+	indexModel := mongo.IndexModel{
+		Keys:    bson.D{{"roomid", 1}},
+		Options: options.Index().SetUnique(true),
+	}
+
+	_, err := r.roomCollection.Indexes().CreateOne(context.Background(), indexModel)
+	if err != nil {
+		return 0, err
+	}
+
+	_, err = r.roomCollection.InsertOne(context.Background(), input)
+	if err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			return 0, errors.Errorf("you've already added room with this id: err: %s; id: %d", err.Error(), input.RoomId)
+		}
+		return 0, err
+	}
+
+	return input.RoomId, nil
 }

@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"github.com/gotalk/models"
-	"github.com/gotalk/utils"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,8 +20,8 @@ func NewUserRepository(usersCollection *mongo.Collection) Authorization {
 func (r *UserRepository) AddUser(user *models.User) error {
 	indexModel := mongo.IndexModel{
 		Keys: bson.D{
-			{string(utils.UserName), -1},
-			{string(utils.UserId), 1},
+			{"username", -1},
+			{"email", 1},
 		},
 		Options: options.Index().SetUnique(true),
 	}

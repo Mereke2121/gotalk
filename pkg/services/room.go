@@ -18,23 +18,11 @@ func NewRoomService(repo *repository.Repository) Room {
 	}
 }
 
-func (s *RoomService) CreateRoom(input *models.Room, userId string) (int, error) {
-	id, err := s.repo.Room.AddRoom(input, userId)
+func (s *RoomService) CreateRoom(input *models.Room) (int, error) {
+	id, err := s.repo.Room.AddRoom(input)
 	if err != nil {
 		return 0, err
 	}
-	//if _, ok := s.rooms[input.RoomId]; !ok {
-	//	room := models.Room{
-	//		RoomId:        input.RoomId,
-	//		Private:       input.Private,
-	//		CreatoruserId: userId,
-	//	}
-	//	if input.Private {
-	//		room.Password = input.Password
-	//	}
-	//	s.rooms[input.RoomId] = &room
-	//	return input.RoomId, nil
-	//}
 	return id, nil
 }
 

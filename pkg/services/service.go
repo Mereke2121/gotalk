@@ -11,7 +11,7 @@ type Authorization interface {
 }
 
 type Room interface {
-	CreateRoom(input *models.Room, userId string) (int, error)
+	CreateRoom(input *models.Room) (int, error)
 	UpdateRoom(input *models.UpdateRoomInput, roomId int, userId string) error
 	AuthenticateInRoom(input *models.JoinRoomInput, roomId int, userId string) error
 	GetAllRooms() ([]models.RoomResponse, error)

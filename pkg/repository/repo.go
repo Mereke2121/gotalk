@@ -11,7 +11,7 @@ type Authorization interface {
 }
 
 type Room interface {
-	AddRoom(input *models.Room, userId string) (int, error)
+	AddRoom(input *models.Room) (int, error)
 }
 
 type Repository struct {

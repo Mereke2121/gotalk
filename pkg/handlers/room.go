@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/gotalk/models"
 	"github.com/gotalk/utils"
+	"github.com/pkg/errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -17,6 +18,9 @@ func (h *Handler) createRoom(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+	if room.Private && room.Password == "" {
+		log.Println(errors.New("there is no provided password"))
+	}
 
 	// get user userId from jwt token in header
 	userId, err := verifyUserId(r)
@@ -24,8 +28,9 @@ func (h *Handler) createRoom(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+	room.CreatorId = userId
 
-	roomId, err := h.service.CreateRoom(room, userId)
+	roomId, err := h.service.CreateRoom(room)
 	if err != nil {
 		log.Println(err)
 		return

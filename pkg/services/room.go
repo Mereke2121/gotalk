@@ -19,6 +19,10 @@ func NewRoomService(repo *repository.Repository) Room {
 }
 
 func (s *RoomService) CreateRoom(input *models.Room, userId string) (int, error) {
+	id, err := s.repo.Room.AddRoom(input, userId)
+	if err != nil {
+		return 0, err
+	}
 	//if _, ok := s.rooms[input.RoomId]; !ok {
 	//	room := models.Room{
 	//		RoomId:        input.RoomId,
@@ -31,7 +35,7 @@ func (s *RoomService) CreateRoom(input *models.Room, userId string) (int, error)
 	//	s.rooms[input.RoomId] = &room
 	//	return input.RoomId, nil
 	//}
-	return 0, errors.Errorf("room is already created; room id: %d", input.RoomId)
+	return id, nil
 }
 
 func (s *RoomService) UpdateRoom(input *models.UpdateRoomInput, roomId int, userId string) error {
@@ -39,7 +43,7 @@ func (s *RoomService) UpdateRoom(input *models.UpdateRoomInput, roomId int, user
 	if !ok {
 		return errors.Errorf("there is no room for by provided room id: %d", room.RoomId)
 	}
-	if room.CreatoruserId != userId {
+	if room.CreatorId != userId {
 		return errors.New("unauthorized")
 	}
 
@@ -60,7 +64,7 @@ func (s *RoomService) AuthenticateInRoom(input *models.JoinRoomInput, roomId int
 	if !room.Private && input == nil {
 		return nil
 	}
-	if userId == room.CreatoruserId || room.Password == input.Password {
+	if userId == room.CreatorId || room.Password == input.Password {
 		return nil
 	}
 	return errors.Errorf("unauthorized for room id: %d", room)
@@ -71,9 +75,9 @@ func (s *RoomService) GetAllRooms() ([]models.RoomResponse, error) {
 
 	for _, room := range s.rooms {
 		result = append(result, models.RoomResponse{
-			RoomId:        room.RoomId,
-			Private:       room.Private,
-			CreatoruserId: room.CreatoruserId,
+			RoomId:    room.RoomId,
+			Private:   room.Private,
+			CreatorId: room.CreatorId,
 		})
 	}
 
@@ -86,9 +90,9 @@ func (s *RoomService) GetRoomById(roomId int) (*models.RoomResponse, error) {
 		return nil, errors.Errorf("there's no room for provided room id: %d", roomId)
 	}
 	return &models.RoomResponse{
-		RoomId:        room.RoomId,
-		Private:       room.Private,
-		CreatoruserId: room.CreatoruserId,
+		RoomId:    room.RoomId,
+		Private:   room.Private,
+		CreatorId: room.CreatorId,
 	}, nil
 }
 
@@ -97,7 +101,7 @@ func (s *RoomService) DeleteRoomById(roomId int, userId string) error {
 	if !ok {
 		return errors.Errorf("there is no room for provided room id: %d", roomId)
 	}
-	if room.CreatoruserId != userId {
+	if room.CreatorId != userId {
 		return errors.New("you don't have access for delete")
 	}
 

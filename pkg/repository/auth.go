@@ -22,7 +22,7 @@ func (r *UserRepository) AddUser(user *models.User) error {
 	indexModel := mongo.IndexModel{
 		Keys: bson.D{
 			{string(utils.UserName), -1},
-			{string(utils.UseruserId), 1},
+			{string(utils.UserId), 1},
 		},
 		Options: options.Index().SetUnique(true),
 	}

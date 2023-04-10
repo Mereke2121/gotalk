@@ -132,7 +132,7 @@ func createToken(roomId int, userId string) (string, error) {
 			Value: roomId,
 		},
 		{
-			Type:  utils.UseruserId,
+			Type:  utils.UserId,
 			Value: userId,
 		},
 	}
@@ -158,7 +158,7 @@ func authenticate(roomIdHeader int, token string) (string, error) {
 		return "", errors.New("you are unauthorized")
 	}
 
-	userIdParam, err := utils.VerifyToken(token, utils.UseruserId)
+	userIdParam, err := utils.VerifyToken(token, utils.UserId)
 	if err != nil {
 		return "", err
 	}

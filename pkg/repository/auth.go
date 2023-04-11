@@ -5,6 +5,7 @@ import (
 	"github.com/gotalk/models"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -53,4 +54,21 @@ func (r *UserRepository) GetUserId(user *models.Authentication) (string, error) 
 	}
 
 	return mongoUser.Id.Hex(), nil
+}
+
+func (r *UserRepository) GetUserById(userId string) (*models.User, error) {
+	id, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.D{
+		{"_id", id},
+	}
+
+	var user *models.User
+	err = r.usersCollection.FindOne(context.Background(), filter).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }

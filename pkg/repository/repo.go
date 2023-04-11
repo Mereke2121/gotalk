@@ -8,6 +8,7 @@ import (
 type Authorization interface {
 	AddUser(user *models.User) error
 	GetUserId(user *models.Authentication) (string, error)
+	GetUserById(userId string) (*models.User, error)
 }
 
 type Room interface {

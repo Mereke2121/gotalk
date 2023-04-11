@@ -18,9 +18,13 @@ type AuthService struct {
 }
 
 func NewAuthService(repo *repository.Repository) Authorization {
+	//return &AuthService{
+	//	users: make(map[string]*models.User),
+	//	repo:  repo,
+	//}
 	return &AuthService{
-		users: make(map[string]*models.User),
 		repo:  repo,
+		users: make(map[string]*models.User),
 	}
 }
 
@@ -37,8 +41,7 @@ func (s *AuthService) AddUser(user *models.User) error {
 }
 
 func (s *AuthService) Authenticate(user *models.Authentication) (string, error) {
-	hashedPassword := hashPassword(user.Password)
-	user.Password = hashedPassword
+	user.Password = hashPassword(user.Password)
 
 	id, err := s.repo.GetUserId(user)
 	if err != nil {
@@ -54,6 +57,10 @@ func (s *AuthService) Authenticate(user *models.Authentication) (string, error) 
 		Value: id,
 	})
 	return utils.CreateToken(jwtFields)
+}
+
+func (s *AuthService) GetUserById(userId string) (*models.User, error) {
+	return s.repo.GetUserById(userId)
 }
 
 func hashPassword(password string) string {

@@ -31,7 +31,13 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// make authentication
-	email, err := authenticate(roomId, token)
+	userId, err := authenticate(roomId, token)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	user, err := h.service.GetUserById(userId)
 	if err != nil {
 		log.Println(err)
 		return
@@ -56,7 +62,7 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 	// listen messages from websocket connection
 	conn.WriteMessage(websocket.TextMessage, []byte("websocket connected"))
 
-	go ListenWS(conn, roomId, email)
+	go ListenWS(conn, roomId, user.Email)
 }
 
 func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
@@ -74,22 +80,22 @@ func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get user email from jwt token in request header
-	email, err := verifyUserEmail(r)
+	// get user id from jwt token in request header
+	userId, err := verifyUserId(r)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	// authentication for chat room by room id and user email
-	err = h.service.AuthenticateInRoom(input, roomId, email)
+	// authentication for chat room by room id and user id
+	err = h.service.AuthenticateInRoom(input, roomId, userId)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
 	// create token for ws connection
-	tokenWS, err := createToken(roomId, email)
+	tokenWS, err := createToken(roomId, userId)
 	if err != nil {
 		log.Println(err)
 		return
@@ -125,15 +131,15 @@ func getJWTToken(r *http.Request) (string, error) {
 	return token, nil
 }
 
-func createToken(roomId int, email string) (string, error) {
+func createToken(roomId int, userId string) (string, error) {
 	jwtFields := []utils.JWTTokenField{
 		{
 			Type:  utils.RoomId,
 			Value: roomId,
 		},
 		{
-			Type:  utils.UserEmail,
-			Value: email,
+			Type:  utils.UserId,
+			Value: userId,
 		},
 	}
 	tokenWS, err := utils.CreateToken(jwtFields)
@@ -158,14 +164,14 @@ func authenticate(roomIdHeader int, token string) (string, error) {
 		return "", errors.New("you are unauthorized")
 	}
 
-	emailParam, err := utils.VerifyToken(token, utils.UserEmail)
+	userIdParam, err := utils.VerifyToken(token, utils.UserId)
 	if err != nil {
 		return "", err
 	}
-	email, ok := emailParam.(string)
+	userId, ok := userIdParam.(string)
 	if !ok {
-		return "", errors.New("convert user email in jwt token from interface to string")
+		return "", errors.New("convert user userId in jwt token from interface to string")
 	}
 
-	return email, nil
+	return userId, nil
 }

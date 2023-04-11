@@ -1,19 +1,23 @@
 package services
 
-import "github.com/gotalk/models"
+import (
+	"github.com/gotalk/models"
+	"github.com/gotalk/pkg/repository"
+)
 
 type Authorization interface {
 	AddUser(user *models.User) error
 	Authenticate(user *models.Authentication) (string, error)
+	GetUserById(userId string) (*models.User, error)
 }
 
 type Room interface {
-	CreateRoom(input *models.Room, email string) (int, error)
-	UpdateRoom(input *models.UpdateRoomInput, roomId int, email string) error
-	AuthenticateInRoom(input *models.JoinRoomInput, roomId int, email string) error
-	GetAllRooms() ([]models.RoomResponse, error)
+	CreateRoom(input *models.Room) (int, error)
+	UpdateRoom(input *models.UpdateRoomInput, roomId int, userId string) error
+	AuthenticateInRoom(input *models.JoinRoomInput, roomId int, userId string) error
+	GetAllRooms() ([]*models.RoomResponse, error)
 	GetRoomById(roomId int) (*models.RoomResponse, error)
-	DeleteRoomById(roomId int, email string) error
+	DeleteRoomById(roomId int, userId string) error
 }
 
 type Service struct {
@@ -21,9 +25,9 @@ type Service struct {
 	Room
 }
 
-func NewService() *Service {
+func NewService(repo *repository.Repository) *Service {
 	return &Service{
-		Authorization: NewAuthService(),
-		Room:          NewRoomService(),
+		Authorization: NewAuthService(repo),
+		Room:          NewRoomService(repo),
 	}
 }

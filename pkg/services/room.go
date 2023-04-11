@@ -2,75 +2,87 @@ package services
 
 import (
 	"github.com/gotalk/models"
+	"github.com/gotalk/pkg/repository"
 	"github.com/pkg/errors"
 )
 
 type RoomService struct {
+	repo  *repository.Repository
 	rooms map[int]*models.Room
 }
 
-func NewRoomService() Room {
+func NewRoomService(repo *repository.Repository) *RoomService {
 	return &RoomService{
 		rooms: make(map[int]*models.Room),
+		repo:  repo,
 	}
 }
 
-func (s *RoomService) CreateRoom(input *models.Room, email string) (int, error) {
-	if _, ok := s.rooms[input.RoomId]; !ok {
-		room := models.Room{
-			RoomId:       input.RoomId,
-			Private:      input.Private,
-			CreatorEmail: email,
-		}
-		if input.Private {
-			room.Password = input.Password
-		}
-		s.rooms[input.RoomId] = &room
-		return input.RoomId, nil
+func (s *RoomService) CreateRoom(input *models.Room) (int, error) {
+	// remove password if chat room is public
+	if !input.Private {
+		input.Password = ""
 	}
-	return 0, errors.Errorf("room is already created; room id: %d", input.RoomId)
+	input.Password = hashPassword(input.Password)
+
+	id, err := s.repo.Room.AddRoom(input)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
-func (s *RoomService) UpdateRoom(input *models.UpdateRoomInput, roomId int, email string) error {
-	room, ok := s.rooms[roomId]
-	if !ok {
-		return errors.Errorf("there is no room for by provided room id: %d", room.RoomId)
+func (s *RoomService) UpdateRoom(input *models.UpdateRoomInput, roomId int, userId string) error {
+	input.Password = hashPassword(input.Password)
+
+	room, err := s.repo.GetRoomById(roomId)
+	if err != nil {
+		return err
 	}
-	if room.CreatorEmail != email {
+	if room.CreatorId != userId {
 		return errors.New("unauthorized")
 	}
-
-	room.Private = input.Private
-	if input.Private {
-		room.Password = input.Password
+	if !input.Private {
+		input.Password = ""
 	}
-	room.Password = ""
+
+	err = s.repo.UpdateRoom(input, roomId)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func (s *RoomService) AuthenticateInRoom(input *models.JoinRoomInput, roomId int, email string) error {
-	room, ok := s.rooms[roomId]
-	if !ok {
-		return errors.Errorf("there is no room by id: %d", roomId)
+func (s *RoomService) AuthenticateInRoom(input *models.JoinRoomInput, roomId int, userId string) error {
+	input.Password = hashPassword(input.Password)
+
+	room, err := s.repo.GetRoomById(roomId)
+	if err != nil {
+		return err
 	}
 	if !room.Private && input == nil {
 		return nil
 	}
-	if email == room.CreatorEmail || room.Password == input.Password {
+	if userId == room.CreatorId || room.Password == input.Password {
 		return nil
 	}
-	return errors.Errorf("unauthorized for room id: %d", room)
+
+	return errors.Errorf("unauthorized for room id: %d", room.RoomId)
 }
 
-func (s *RoomService) GetAllRooms() ([]models.RoomResponse, error) {
-	var result []models.RoomResponse
+func (s *RoomService) GetAllRooms() ([]*models.RoomResponse, error) {
+	rooms, err := s.repo.GetAllRooms()
+	if err != nil {
+		return nil, err
+	}
 
-	for _, room := range s.rooms {
-		result = append(result, models.RoomResponse{
-			RoomId:       room.RoomId,
-			Private:      room.Private,
-			CreatorEmail: room.CreatorEmail,
+	var result []*models.RoomResponse
+	for _, room := range rooms {
+		result = append(result, &models.RoomResponse{
+			RoomId:    room.RoomId,
+			Private:   room.Private,
+			CreatorId: room.CreatorId,
 		})
 	}
 
@@ -78,26 +90,25 @@ func (s *RoomService) GetAllRooms() ([]models.RoomResponse, error) {
 }
 
 func (s *RoomService) GetRoomById(roomId int) (*models.RoomResponse, error) {
-	room, ok := s.rooms[roomId]
-	if !ok {
-		return nil, errors.Errorf("there's no room for provided room id: %d", roomId)
+	room, err := s.repo.GetRoomById(roomId)
+	if err != nil {
+		return nil, err
 	}
 	return &models.RoomResponse{
-		RoomId:       room.RoomId,
-		Private:      room.Private,
-		CreatorEmail: room.CreatorEmail,
+		RoomId:    room.RoomId,
+		Private:   room.Private,
+		CreatorId: room.CreatorId,
 	}, nil
 }
 
-func (s *RoomService) DeleteRoomById(roomId int, email string) error {
-	room, ok := s.rooms[roomId]
-	if !ok {
-		return errors.Errorf("there is no room for provided room id: %d", roomId)
+func (s *RoomService) DeleteRoomById(roomId int, userId string) error {
+	room, err := s.repo.GetRoomById(roomId)
+	if err != nil {
+		return err
 	}
-	if room.CreatorEmail != email {
-		return errors.New("you don't have access for delete")
+	if room.CreatorId != userId {
+		return errors.New("unauthorized")
 	}
 
-	delete(s.rooms, roomId)
-	return nil
+	return s.repo.DeleteRoomById(roomId)
 }

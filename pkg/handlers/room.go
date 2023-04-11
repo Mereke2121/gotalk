@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/gotalk/models"
 	"github.com/gotalk/utils"
+	"github.com/pkg/errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -17,15 +18,19 @@ func (h *Handler) createRoom(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+	if room.Private && room.Password == "" {
+		log.Println(errors.New("there is no provided password"))
+	}
 
-	// get user email from jwt token in header
-	email, err := verifyUserEmail(r)
+	// get user userId from jwt token in header
+	userId, err := verifyUserId(r)
 	if err != nil {
 		log.Println(err)
 		return
 	}
+	room.CreatorId = userId
 
-	roomId, err := h.service.CreateRoom(room, email)
+	roomId, err := h.service.CreateRoom(room)
 	if err != nil {
 		log.Println(err)
 		return
@@ -48,10 +53,10 @@ func (h *Handler) updateRoomById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get user email from jwt token in header
-	email, err := verifyUserEmail(r)
+	// get user id from jwt token in header
+	userId, err := verifyUserId(r)
 
-	err = h.service.UpdateRoom(room, roomId, email)
+	err = h.service.UpdateRoom(room, roomId, userId)
 	if err != nil {
 		log.Println(err)
 		return
@@ -63,7 +68,7 @@ func (h *Handler) updateRoomById(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) getAllRooms(w http.ResponseWriter, r *http.Request) {
 	// verify user
-	_, err := verifyUserEmail(r)
+	_, err := verifyUserId(r)
 	if err != nil {
 		log.Println(err)
 		return
@@ -75,7 +80,7 @@ func (h *Handler) getAllRooms(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resultBody, err := json.Marshal(rooms)
+	resultBody, err := json.MarshalIndent(rooms, "", " ")
 	if err != nil {
 		log.Println(err)
 		return
@@ -87,7 +92,7 @@ func (h *Handler) getAllRooms(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) getRoomById(w http.ResponseWriter, r *http.Request) {
 	// verify user
-	_, err := verifyUserEmail(r)
+	_, err := verifyUserId(r)
 	if err != nil {
 		log.Println(err)
 		return
@@ -105,7 +110,7 @@ func (h *Handler) getRoomById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	roomBody, err := json.Marshal(&room)
+	roomBody, err := json.MarshalIndent(room, "", " ")
 	if err != nil {
 		log.Println(err)
 		return
@@ -117,7 +122,7 @@ func (h *Handler) getRoomById(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) deleteRoomById(w http.ResponseWriter, r *http.Request) {
 	// verify user
-	email, err := verifyUserEmail(r)
+	userId, err := verifyUserId(r)
 	if err != nil {
 		log.Println(err)
 		return
@@ -129,7 +134,7 @@ func (h *Handler) deleteRoomById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.service.DeleteRoomById(roomId, email)
+	err = h.service.DeleteRoomById(roomId, userId)
 	if err != nil {
 		log.Println(err)
 		return
@@ -139,18 +144,18 @@ func (h *Handler) deleteRoomById(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("delete successfully"))
 }
 
-func verifyUserEmail(r *http.Request) (string, error) {
+func verifyUserId(r *http.Request) (string, error) {
 	userToken, err := getJWTToken(r)
 	if err != nil {
 		return "", err
 	}
-	emailParam, err := utils.VerifyToken(userToken, utils.UserEmail)
+	userIdStr, err := utils.VerifyToken(userToken, utils.UserId)
 	if err != nil {
 		return "", err
 	}
-	email, ok := emailParam.(string)
+	userId, ok := userIdStr.(string)
 	if !ok {
-		log.Println("invalid user email")
+		log.Println("invalid user id")
 	}
-	return email, nil
+	return userId, nil
 }

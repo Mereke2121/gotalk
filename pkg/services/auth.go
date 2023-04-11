@@ -5,19 +5,25 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"github.com/gotalk/models"
+	"github.com/gotalk/pkg/repository"
 	"github.com/gotalk/utils"
-	"github.com/pkg/errors"
 	"log"
 )
 
 var salt = "39@#$rkf@dk!dwk$#"
 
 type AuthService struct {
+	repo  *repository.Repository
 	users map[string]*models.User
 }
 
-func NewAuthService() Authorization {
+func NewAuthService(repo *repository.Repository) Authorization {
+	//return &AuthService{
+	//	users: make(map[string]*models.User),
+	//	repo:  repo,
+	//}
 	return &AuthService{
+		repo:  repo,
 		users: make(map[string]*models.User),
 	}
 }
@@ -25,41 +31,36 @@ func NewAuthService() Authorization {
 func (s *AuthService) AddUser(user *models.User) error {
 	hashedPassword := hashPassword(user.Password)
 
-	if _, ok := s.users[user.Email]; !ok {
-		s.users[user.Email] = &models.User{
-			UserName: user.UserName,
-			Email:    user.Email,
-			Password: hashedPassword,
-		}
-	} else {
-		return errors.New("you already authorized")
+	user.Password = hashedPassword
+	err := s.repo.AddUser(user)
+	if err != nil {
+		return err
 	}
-
-	log.Println("users: ", s.users)
 
 	return nil
 }
 
 func (s *AuthService) Authenticate(user *models.Authentication) (string, error) {
-	hashedPassword := hashPassword(user.Password)
+	user.Password = hashPassword(user.Password)
 
-	if _, ok := s.users[user.Email]; ok {
-		if s.users[user.Email].Password != hashedPassword {
-			return "", errors.New("unauthorized")
-		}
-	} else {
-		return "", errors.Errorf("there's no user by this email: %s", user.Email)
+	id, err := s.repo.GetUserId(user)
+	if err != nil {
+		return "", err
 	}
 
-	log.Println("users: ", s.users)
+	log.Println("user id: ", id)
 
 	// create jwt token and return in
 	var jwtFields []utils.JWTTokenField
 	jwtFields = append(jwtFields, utils.JWTTokenField{
-		Type:  utils.UserEmail,
-		Value: user.Email,
+		Type:  utils.UserId,
+		Value: id,
 	})
 	return utils.CreateToken(jwtFields)
+}
+
+func (s *AuthService) GetUserById(userId string) (*models.User, error) {
+	return s.repo.GetUserById(userId)
 }
 
 func hashPassword(password string) string {

@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/gorilla/websocket"
 	"github.com/gotalk/models"
@@ -54,15 +53,7 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	if clients[roomId] == nil {
-		clients[roomId] = make(map[*websocket.Conn]bool)
-	}
-	clients[roomId][conn] = true
-
-	// listen messages from websocket connection
-	conn.WriteMessage(websocket.TextMessage, []byte("websocket connected"))
-
-	go ListenWS(conn, roomId, user.Email)
+	h.service.MakeWSConnection(conn, roomId, user.Email)
 }
 
 func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
@@ -103,24 +94,6 @@ func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(tokenWS))
-}
-
-func ListenWS(conn *websocket.Conn, roomId int, email string) {
-	defer conn.Close()
-
-	for {
-		_, msg, err := conn.ReadMessage()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		wsMessage := fmt.Sprintf("%s: %s", email, string(msg))
-		// broadcast to all clients
-		for client := range clients[roomId] {
-			client.WriteMessage(websocket.TextMessage, []byte(wsMessage))
-		}
-	}
 }
 
 func getJWTToken(r *http.Request) (string, error) {

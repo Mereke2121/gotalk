@@ -15,6 +15,7 @@ type Room interface {
 	GetAllRooms() ([]*models.RoomResponse, error)
 	GetRoomById(roomId int) (*models.RoomResponse, error)
 	UpdateRoom(input *models.UpdateRoomInput, roomId int) error
+	DeleteRoomById(roomId int) error
 }
 
 type Repository struct {

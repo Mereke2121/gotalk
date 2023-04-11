@@ -87,3 +87,11 @@ func (r *RoomRepository) UpdateRoom(input *models.UpdateRoomInput, roomId int) e
 
 	return r.roomCollection.FindOneAndUpdate(context.Background(), filter, update).Err()
 }
+
+func (r *RoomRepository) DeleteRoomById(roomId int) error {
+	filter := bson.D{
+		{"roomid", roomId},
+	}
+	_, err := r.roomCollection.DeleteOne(context.Background(), filter)
+	return err
+}

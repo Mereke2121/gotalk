@@ -106,14 +106,13 @@ func (s *RoomService) GetRoomById(roomId int) (*models.RoomResponse, error) {
 }
 
 func (s *RoomService) DeleteRoomById(roomId int, userId string) error {
-	room, ok := s.rooms[roomId]
-	if !ok {
-		return errors.Errorf("there is no room for provided room id: %d", roomId)
+	room, err := s.repo.GetRoomById(roomId)
+	if err != nil {
+		return err
 	}
 	if room.CreatorId != userId {
-		return errors.New("you don't have access for delete")
+		return errors.New("unauthorized")
 	}
 
-	delete(s.rooms, roomId)
-	return nil
+	return s.repo.DeleteRoomById(roomId)
 }

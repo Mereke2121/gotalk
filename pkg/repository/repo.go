@@ -13,6 +13,7 @@ type Authorization interface {
 type Room interface {
 	AddRoom(input *models.Room) (int, error)
 	GetAllRooms() ([]*models.RoomResponse, error)
+	GetRoomById(roomId int) (*models.RoomResponse, error)
 }
 
 type Repository struct {

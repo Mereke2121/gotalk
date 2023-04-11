@@ -65,3 +65,14 @@ func (r *RoomRepository) GetAllRooms() ([]*models.RoomResponse, error) {
 	}
 	return rooms, nil
 }
+
+func (r *RoomRepository) GetRoomById(roomId int) (*models.RoomResponse, error) {
+	option := options.FindOne()
+	filter := bson.D{
+		{"roomid", roomId},
+	}
+
+	var room *models.RoomResponse
+	err := r.roomCollection.FindOne(context.Background(), filter, option).Decode(&room)
+	return room, err
+}

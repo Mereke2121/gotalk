@@ -77,15 +77,16 @@ func (s *RoomService) GetAllRooms() ([]*models.RoomResponse, error) {
 }
 
 func (s *RoomService) GetRoomById(roomId int) (*models.RoomResponse, error) {
-	room, ok := s.rooms[roomId]
-	if !ok {
-		return nil, errors.Errorf("there's no room for provided room id: %d", roomId)
-	}
-	return &models.RoomResponse{
-		RoomId:    room.RoomId,
-		Private:   room.Private,
-		CreatorId: room.CreatorId,
-	}, nil
+	//room, ok := s.rooms[roomId]
+	//if !ok {
+	//	return nil, errors.Errorf("there's no room for provided room id: %d", roomId)
+	//}
+	//return &models.RoomResponse{
+	//	RoomId:    room.RoomId,
+	//	Private:   room.Private,
+	//	CreatorId: room.CreatorId,
+	//}, nil
+	return s.repo.GetRoomById(roomId)
 }
 
 func (s *RoomService) DeleteRoomById(roomId int, userId string) error {

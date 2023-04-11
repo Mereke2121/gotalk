@@ -110,7 +110,7 @@ func (h *Handler) getRoomById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	roomBody, err := json.Marshal(&room)
+	roomBody, err := json.MarshalIndent(room, "", " ")
 	if err != nil {
 		log.Println(err)
 		return

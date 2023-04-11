@@ -23,6 +23,7 @@ func (s *RoomService) CreateRoom(input *models.Room) (int, error) {
 	if !input.Private {
 		input.Password = ""
 	}
+	input.Password = hashPassword(input.Password)
 
 	id, err := s.repo.Room.AddRoom(input)
 	if err != nil {
@@ -32,6 +33,8 @@ func (s *RoomService) CreateRoom(input *models.Room) (int, error) {
 }
 
 func (s *RoomService) UpdateRoom(input *models.UpdateRoomInput, roomId int, userId string) error {
+	input.Password = hashPassword(input.Password)
+
 	room, err := s.repo.GetRoomById(roomId)
 	if err != nil {
 		return err

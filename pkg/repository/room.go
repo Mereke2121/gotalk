@@ -76,3 +76,14 @@ func (r *RoomRepository) GetRoomById(roomId int) (*models.RoomResponse, error) {
 	err := r.roomCollection.FindOne(context.Background(), filter, option).Decode(&room)
 	return room, err
 }
+
+func (r *RoomRepository) UpdateRoom(input *models.UpdateRoomInput, roomId int) error {
+	filter := bson.D{
+		{"roomid", roomId},
+	}
+	update := bson.D{
+		{"$set", input},
+	}
+
+	return r.roomCollection.FindOneAndUpdate(context.Background(), filter, update).Err()
+}

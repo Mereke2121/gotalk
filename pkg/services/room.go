@@ -32,19 +32,35 @@ func (s *RoomService) CreateRoom(input *models.Room) (int, error) {
 }
 
 func (s *RoomService) UpdateRoom(input *models.UpdateRoomInput, roomId int, userId string) error {
-	room, ok := s.rooms[roomId]
-	if !ok {
-		return errors.Errorf("there is no room for by provided room id: %d", room.RoomId)
+	room, err := s.repo.GetRoomById(roomId)
+	if err != nil {
+		return err
 	}
 	if room.CreatorId != userId {
 		return errors.New("unauthorized")
 	}
-
-	room.Private = input.Private
-	if input.Private {
-		room.Password = input.Password
+	if !input.Private {
+		input.Password = ""
 	}
-	room.Password = ""
+
+	err = s.repo.UpdateRoom(input, roomId)
+	if err != nil {
+		return err
+	}
+
+	//room, ok := s.rooms[roomId]
+	//if !ok {
+	//	return errors.Errorf("there is no room for by provided room id: %d", room.RoomId)
+	//}
+	//if room.CreatorId != userId {
+	//	return errors.New("unauthorized")
+	//}
+	//
+	//room.Private = input.Private
+	//if input.Private {
+	//	room.Password = input.Password
+	//}
+	//room.Password = ""
 
 	return nil
 }

@@ -80,7 +80,7 @@ func (h *Handler) getAllRooms(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resultBody, err := json.Marshal(rooms)
+	resultBody, err := json.MarshalIndent(rooms, "", " ")
 	if err != nil {
 		log.Println(err)
 		return

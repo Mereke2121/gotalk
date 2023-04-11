@@ -11,7 +11,7 @@ type RoomService struct {
 	rooms map[int]*models.Room
 }
 
-func NewRoomService(repo *repository.Repository) Room {
+func NewRoomService(repo *repository.Repository) *RoomService {
 	return &RoomService{
 		rooms: make(map[int]*models.Room),
 		repo:  repo,
@@ -19,6 +19,11 @@ func NewRoomService(repo *repository.Repository) Room {
 }
 
 func (s *RoomService) CreateRoom(input *models.Room) (int, error) {
+	// remove password if chat room is public
+	if !input.Private {
+		input.Password = ""
+	}
+
 	id, err := s.repo.Room.AddRoom(input)
 	if err != nil {
 		return 0, err
@@ -58,18 +63,17 @@ func (s *RoomService) AuthenticateInRoom(input *models.JoinRoomInput, roomId int
 	return errors.Errorf("unauthorized for room id: %d", room)
 }
 
-func (s *RoomService) GetAllRooms() ([]models.RoomResponse, error) {
-	var result []models.RoomResponse
+func (s *RoomService) GetAllRooms() ([]*models.RoomResponse, error) {
+	//var result []models.RoomResponse
 
-	for _, room := range s.rooms {
-		result = append(result, models.RoomResponse{
-			RoomId:    room.RoomId,
-			Private:   room.Private,
-			CreatorId: room.CreatorId,
-		})
-	}
-
-	return result, nil
+	//for _, room := range s.rooms {
+	//	result = append(result, models.RoomResponse{
+	//		RoomId:    room.RoomId,
+	//		Private:   room.Private,
+	//		CreatorId: room.CreatorId,
+	//	})
+	//}
+	return s.repo.GetAllRooms()
 }
 
 func (s *RoomService) GetRoomById(roomId int) (*models.RoomResponse, error) {

@@ -20,11 +20,6 @@ func NewRoomRepository(roomCollection *mongo.Collection) *RoomRepository {
 }
 
 func (r *RoomRepository) AddRoom(input *models.Room) (int, error) {
-	// remove password if chat room is public
-	if !input.Private {
-		input.Password = ""
-	}
-
 	indexModel := mongo.IndexModel{
 		Keys:    bson.D{{"roomid", 1}},
 		Options: options.Index().SetUnique(true),
@@ -44,4 +39,29 @@ func (r *RoomRepository) AddRoom(input *models.Room) (int, error) {
 	}
 
 	return input.RoomId, nil
+}
+
+func (r *RoomRepository) GetAllRooms() ([]*models.RoomResponse, error) {
+	option := options.Find()
+
+	cursor, err := r.roomCollection.Find(context.Background(), bson.D{}, option)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	var rooms []*models.RoomResponse
+	for cursor.Next(context.Background()) {
+		var room *models.RoomResponse
+		err := cursor.Decode(&room)
+		if err != nil {
+			return nil, err
+		}
+		rooms = append(rooms, room)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+	return rooms, nil
 }

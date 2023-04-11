@@ -12,8 +12,8 @@ type Authorization interface {
 
 type Room interface {
 	AddRoom(input *models.Room) (int, error)
-	GetAllRooms() ([]*models.RoomResponse, error)
-	GetRoomById(roomId int) (*models.RoomResponse, error)
+	GetAllRooms() ([]*models.Room, error)
+	GetRoomById(roomId int) (*models.Room, error)
 	UpdateRoom(input *models.UpdateRoomInput, roomId int) error
 	DeleteRoomById(roomId int) error
 }

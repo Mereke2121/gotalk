@@ -41,7 +41,7 @@ func (r *RoomRepository) AddRoom(input *models.Room) (int, error) {
 	return input.RoomId, nil
 }
 
-func (r *RoomRepository) GetAllRooms() ([]*models.RoomResponse, error) {
+func (r *RoomRepository) GetAllRooms() ([]*models.Room, error) {
 	option := options.Find()
 
 	cursor, err := r.roomCollection.Find(context.Background(), bson.D{}, option)
@@ -50,9 +50,9 @@ func (r *RoomRepository) GetAllRooms() ([]*models.RoomResponse, error) {
 	}
 	defer cursor.Close(context.Background())
 
-	var rooms []*models.RoomResponse
+	var rooms []*models.Room
 	for cursor.Next(context.Background()) {
-		var room *models.RoomResponse
+		var room *models.Room
 		err := cursor.Decode(&room)
 		if err != nil {
 			return nil, err
@@ -66,13 +66,13 @@ func (r *RoomRepository) GetAllRooms() ([]*models.RoomResponse, error) {
 	return rooms, nil
 }
 
-func (r *RoomRepository) GetRoomById(roomId int) (*models.RoomResponse, error) {
+func (r *RoomRepository) GetRoomById(roomId int) (*models.Room, error) {
 	option := options.FindOne()
 	filter := bson.D{
 		{"roomid", roomId},
 	}
 
-	var room *models.RoomResponse
+	var room *models.Room
 	err := r.roomCollection.FindOne(context.Background(), filter, option).Decode(&room)
 	return room, err
 }

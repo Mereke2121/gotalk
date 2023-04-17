@@ -12,8 +12,12 @@ import (
 	"strconv"
 )
 
-var clients = make(map[int]map[*websocket.Conn]bool)
-
+// @Summary      Ws connection with chat room
+// @Description  join room
+// @Tags         ws
+// @Param token header string true "token getting after joining room"
+// @Success      200  {string} string
+// @Router       /ws/{id} [get]
 func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 	// get body and header params
 	roomId, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -56,6 +60,12 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 	h.service.MakeWSConnection(conn, roomId, user.Email)
 }
 
+// @Summary      Join chat room
+// @Description  join room
+// @Tags         ws
+// @Param token header string true "auth token"
+// @Success      200  {string} string
+// @Router       /ws/{id}/join [post]
 func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
 	var input *models.JoinRoomInput
 	if r.ContentLength > 0 {

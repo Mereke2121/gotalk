@@ -2,13 +2,19 @@ package handlers
 
 import (
 	"github.com/go-chi/chi"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"net/http"
+
+	_ "github.com/gotalk/docs"
 )
 
 func (h *Handler) InitRoutes() http.Handler {
 	mux := chi.NewRouter()
 
-	//auth
+	// swagger
+	mux.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL("http://localhost:8000/swagger/doc.json")))
+
+	// auth
 	mux.Post("/sign-up", h.signUp)
 	mux.Post("/sign-in", h.signIn) // return jwt token which consists user id
 

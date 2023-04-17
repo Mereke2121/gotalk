@@ -11,6 +11,12 @@ import (
 	"log"
 )
 
+// @title 			Gotalk API
+// @version			1.0
+// @description		This is the chat rest api
+
+// @host 			localhost:8080
+// @BasePath		/
 func main() {
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 
@@ -27,6 +33,7 @@ func main() {
 		log.Fatal(err)
 		return
 	}
+
 	//TODO: add creating this collections
 	userCollection := client.Database("gotalk").Collection("users")
 	roomCollection := client.Database("gotalk").Collection("rooms")

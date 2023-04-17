@@ -1,0 +1,219 @@
+basePath: /
+definitions:
+  models.Authentication:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  models.Room:
+    properties:
+      creator_id:
+        type: string
+      password:
+        type: string
+      private:
+        type: boolean
+      room_id:
+        type: integer
+    type: object
+  models.RoomResponse:
+    properties:
+      creator_id:
+        type: string
+      private:
+        type: boolean
+      room_id:
+        type: integer
+    type: object
+  models.UpdateRoomInput:
+    properties:
+      password:
+        type: string
+      private:
+        type: boolean
+    type: object
+  models.User:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is the chat rest api
+  title: Gotalk API
+  version: "1.0"
+paths:
+  /room:
+    get:
+      description: get all rooms
+      parameters:
+      - description: auth token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.RoomResponse'
+            type: array
+      summary: Get all rooms
+      tags:
+      - room
+    post:
+      description: create room
+      parameters:
+      - description: room
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.Room'
+      - description: auth token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: int
+      summary: Create Room
+      tags:
+      - room
+  /room/{id}:
+    delete:
+      description: delete room
+      parameters:
+      - description: auth token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Delete room by id
+      tags:
+      - room
+    get:
+      description: get room by id
+      parameters:
+      - description: auth token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.RoomResponse'
+      summary: Get room by id
+      tags:
+      - room
+    put:
+      description: update room
+      parameters:
+      - description: update room
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateRoomInput'
+      - description: auth token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Update room
+      tags:
+      - room
+  /sign-in:
+    post:
+      description: authentication
+      parameters:
+      - description: Authentication
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.Authentication'
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Sign in
+      tags:
+      - auth
+  /sign-up:
+    post:
+      description: authorization
+      parameters:
+      - description: Authorization
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Sign up
+      tags:
+      - auth
+  /ws/{id}:
+    get:
+      description: join room
+      parameters:
+      - description: token getting after joining room
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Ws connection with chat room
+      tags:
+      - ws
+  /ws/{id}/join:
+    post:
+      description: join room
+      parameters:
+      - description: auth token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Join chat room
+      tags:
+      - ws
+swagger: "2.0"

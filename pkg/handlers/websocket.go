@@ -23,7 +23,7 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 	roomId, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		h.logger.Error("invalid room id", zap.Error(err))
-		handleError(http.StatusBadRequest, "invalid room id", w)
+		handleError(http.StatusBadRequest, "invalid room id", err, w)
 		return
 	}
 
@@ -31,7 +31,7 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 	token, err := getJWTToken(r)
 	if err != nil {
 		h.logger.Error("invalid jwt token", zap.Error(err))
-		handleError(http.StatusUnauthorized, "invalid jwt token", w)
+		handleError(http.StatusUnauthorized, "invalid jwt token", err, w)
 		return
 	}
 
@@ -39,14 +39,14 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 	userId, err := authenticate(roomId, token)
 	if err != nil {
 		h.logger.Error("authenticate user", zap.Error(err))
-		handleError(http.StatusInternalServerError, "authenticate user", w)
+		handleError(http.StatusInternalServerError, "authenticate user", err, w)
 		return
 	}
 
 	user, err := h.service.GetUserById(userId)
 	if err != nil {
 		h.logger.Error("get user by id", zap.String("user id", userId), zap.Error(err))
-		handleError(http.StatusInternalServerError, "get user by id", w)
+		handleError(http.StatusInternalServerError, "get user by id", err, w)
 		return
 	}
 
@@ -59,7 +59,7 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrade.Upgrade(w, r, nil)
 	if err != nil {
 		h.logger.Error("websocket connection", zap.Error(err))
-		handleError(http.StatusInternalServerError, "websocket connection", w)
+		handleError(http.StatusInternalServerError, "websocket connection", err, w)
 		return
 	}
 	h.service.MakeWSConnection(conn, roomId, user.Email)
@@ -76,7 +76,7 @@ func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
 	if r.ContentLength > 0 {
 		if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 			h.logger.Error("parse input body", zap.Error(err))
-			handleError(http.StatusBadRequest, "parse input body", w)
+			handleError(http.StatusBadRequest, "parse input body", err, w)
 			return
 		}
 	}
@@ -84,7 +84,7 @@ func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
 	roomId, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		h.logger.Error("invalid room id", zap.Error(err))
-		handleError(http.StatusBadRequest, "invalid room id", w)
+		handleError(http.StatusBadRequest, "invalid room id", err, w)
 		return
 	}
 
@@ -92,7 +92,7 @@ func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
 	userId, err := verifyUserId(r)
 	if err != nil {
 		h.logger.Error("invalid jwt token", zap.Error(err))
-		handleError(http.StatusUnauthorized, "invalid jwt token", w)
+		handleError(http.StatusUnauthorized, "invalid jwt token", err, w)
 		return
 	}
 
@@ -100,7 +100,7 @@ func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
 	err = h.service.AuthenticateInRoom(input, roomId, userId)
 	if err != nil {
 		h.logger.Error("authenticate in room by room and user id", zap.Error(err))
-		handleError(http.StatusUnauthorized, "authenticate in room by room and user id", w)
+		handleError(http.StatusUnauthorized, "authenticate in room by room and user id", err, w)
 		return
 	}
 
@@ -108,7 +108,7 @@ func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
 	tokenWS, err := createToken(roomId, userId)
 	if err != nil {
 		h.logger.Error("create jwt token for ws connection", zap.Error(err))
-		handleError(http.StatusInternalServerError, "create jwt token for ws connection", w)
+		handleError(http.StatusInternalServerError, "create jwt token for ws connection", err, w)
 		return
 	}
 

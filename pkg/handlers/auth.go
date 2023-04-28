@@ -18,14 +18,14 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		h.logger.Error("parse input user model", zap.Error(err))
-		handleError(http.StatusBadRequest, "parse input user model", w)
+		handleError(http.StatusBadRequest, "parse input user model", err, w)
 		return
 	}
 
 	err = h.service.AddUser(user)
 	if err != nil {
 		h.logger.Error("add user", zap.Error(err))
-		handleError(http.StatusInternalServerError, "add user", w)
+		handleError(http.StatusInternalServerError, "add user", err, w)
 		return
 	}
 
@@ -44,14 +44,14 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		h.logger.Error("parse input user model", zap.Error(err))
-		handleError(http.StatusBadRequest, "parse input user model", w)
+		handleError(http.StatusBadRequest, "parse input user model", err, w)
 		return
 	}
 
 	token, err := h.service.Authenticate(&user)
 	if err != nil {
 		h.logger.Error("authenticate user", zap.Error(err))
-		handleError(http.StatusInternalServerError, "authenticate user", w)
+		handleError(http.StatusInternalServerError, "authenticate user", err, w)
 		return
 	}
 

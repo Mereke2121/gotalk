@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/gotalk/pkg/services"
 	"go.uber.org/zap"
 	"net/http"
@@ -18,7 +19,7 @@ func NewHandler(service *services.Service, logger *zap.Logger) *Handler {
 	}
 }
 
-func handleError(code int, message string, w http.ResponseWriter) {
+func handleError(code int, message string, err error, w http.ResponseWriter) {
 	w.WriteHeader(code)
-	w.Write([]byte(message))
+	w.Write([]byte(fmt.Sprintf("%s; err: %s", message, err.Error())))
 }

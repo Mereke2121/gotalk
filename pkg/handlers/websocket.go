@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/go-chi/chi"
 	"github.com/gorilla/websocket"
 	"github.com/gotalk/models"
 	"github.com/gotalk/utils"
-	"log"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	"net/http"
 	"strconv"
 )
@@ -22,27 +22,31 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 	// get body and header params
 	roomId, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		log.Println("invalid room id")
+		h.logger.Error("invalid room id", zap.Error(err))
+		handleError(http.StatusBadRequest, "invalid room id", err, w)
 		return
 	}
 
 	// get jwt token from header
 	token, err := getJWTToken(r)
 	if err != nil {
-		log.Println(err)
+		h.logger.Error("invalid jwt token", zap.Error(err))
+		handleError(http.StatusUnauthorized, "invalid jwt token", err, w)
 		return
 	}
 
 	// make authentication
 	userId, err := authenticate(roomId, token)
 	if err != nil {
-		log.Println(err)
+		h.logger.Error("authenticate user", zap.Error(err))
+		handleError(http.StatusInternalServerError, "authenticate user", err, w)
 		return
 	}
 
 	user, err := h.service.GetUserById(userId)
 	if err != nil {
-		log.Println(err)
+		h.logger.Error("get user by id", zap.String("user id", userId), zap.Error(err))
+		handleError(http.StatusInternalServerError, "get user by id", err, w)
 		return
 	}
 
@@ -54,7 +58,8 @@ func (h *Handler) wsConnection(w http.ResponseWriter, r *http.Request) {
 
 	conn, err := upgrade.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		h.logger.Error("websocket connection", zap.Error(err))
+		handleError(http.StatusInternalServerError, "websocket connection", err, w)
 		return
 	}
 	h.service.MakeWSConnection(conn, roomId, user.Email)
@@ -70,35 +75,40 @@ func (h *Handler) joinRoom(w http.ResponseWriter, r *http.Request) {
 	var input *models.JoinRoomInput
 	if r.ContentLength > 0 {
 		if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-			log.Println(err)
+			h.logger.Error("parse input body", zap.Error(err))
+			handleError(http.StatusBadRequest, "parse input body", err, w)
 			return
 		}
 	}
 
 	roomId, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		log.Println("invalid room id")
+		h.logger.Error("invalid room id", zap.Error(err))
+		handleError(http.StatusBadRequest, "invalid room id", err, w)
 		return
 	}
 
 	// get user id from jwt token in request header
 	userId, err := verifyUserId(r)
 	if err != nil {
-		log.Println(err)
+		h.logger.Error("invalid jwt token", zap.Error(err))
+		handleError(http.StatusUnauthorized, "invalid jwt token", err, w)
 		return
 	}
 
 	// authentication for chat room by room id and user id
 	err = h.service.AuthenticateInRoom(input, roomId, userId)
 	if err != nil {
-		log.Println(err)
+		h.logger.Error("authenticate in room by room and user id", zap.Error(err))
+		handleError(http.StatusUnauthorized, "authenticate in room by room and user id", err, w)
 		return
 	}
 
 	// create token for ws connection
 	tokenWS, err := createToken(roomId, userId)
 	if err != nil {
-		log.Println(err)
+		h.logger.Error("create jwt token for ws connection", zap.Error(err))
+		handleError(http.StatusInternalServerError, "create jwt token for ws connection", err, w)
 		return
 	}
 
@@ -125,18 +135,14 @@ func createToken(roomId int, userId string) (string, error) {
 			Value: userId,
 		},
 	}
-	tokenWS, err := utils.CreateToken(jwtFields)
-	if err != nil {
-		log.Println(err)
-		return "", err
-	}
-	return tokenWS, nil
+	return utils.CreateToken(jwtFields)
 }
 
 func authenticate(roomIdHeader int, token string) (string, error) {
+	// get room id
 	roomParam, err := utils.VerifyToken(token, utils.RoomId)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "invalid token")
 	}
 	roomId, ok := roomParam.(float64)
 	if !ok {
@@ -144,12 +150,13 @@ func authenticate(roomIdHeader int, token string) (string, error) {
 	}
 
 	if roomIdHeader != int(roomId) {
-		return "", errors.New("you are unauthorized")
+		return "", errors.New("invalid room id")
 	}
 
+	// get user id
 	userIdParam, err := utils.VerifyToken(token, utils.UserId)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "invalid token")
 	}
 	userId, ok := userIdParam.(string)
 	if !ok {

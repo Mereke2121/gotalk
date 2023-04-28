@@ -3,7 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"github.com/gotalk/models"
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -17,13 +17,15 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 	var user *models.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		log.Println(err)
+		h.logger.Error("parse input user model", zap.Error(err))
+		handleError(http.StatusBadRequest, "parse input user model", w)
 		return
 	}
 
 	err = h.service.AddUser(user)
 	if err != nil {
-		log.Println(err)
+		h.logger.Error("add user", zap.Error(err))
+		handleError(http.StatusInternalServerError, "add user", w)
 		return
 	}
 
@@ -41,13 +43,15 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 	var user models.Authentication
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		log.Println(err)
+		h.logger.Error("parse input user model", zap.Error(err))
+		handleError(http.StatusBadRequest, "parse input user model", w)
 		return
 	}
 
 	token, err := h.service.Authenticate(&user)
 	if err != nil {
-		log.Println(err)
+		h.logger.Error("authenticate user", zap.Error(err))
+		handleError(http.StatusInternalServerError, "authenticate user", w)
 		return
 	}
 

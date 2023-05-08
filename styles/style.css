@@ -1,0 +1,45 @@
+body {
+    background-image: url(./../images/background/login-bg.jpg);
+    background-repeat: no-repeat;
+}
+
+.welcome__title {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 64px;
+    text-align: center;
+    letter-spacing: 0.1em;
+    color: #FFFFFF;
+    text-transform: uppercase;
+}
+
+.welcome__login {
+    width: 314px;
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 0 auto;
+}
+
+.welcome__login-item {
+    width: 314px;
+    height: 69px;
+    background: rgba(217, 217, 217, 0.4);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+input {
+    background: none;
+    width: 280px;
+    height: 30px;
+    border: none;
+    text-align: center;
+}
+input::placeholder {
+    font-weight: bold;
+    color: white;
+}

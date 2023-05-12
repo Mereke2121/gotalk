@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,22 +8,30 @@
     <link rel="stylesheet" href="./styles/style.css">
     <title>login</title>
 </head>
+
 <body>
     <section class="welcome">
-        <h1 class="welcome__title">welcome</h1>
-        
-        <div class="welcome__login">
-            <div class="welcome__name">
-                <div class="welcome__login-item">
-                    <input type="text" placeholder="username">
+        <div class="welcome__container">
+            <h1 class="welcome__title">welcome</h1>
+            <form action="#" method="get" enctype="multipart/form-data">
+                <div class="welcome__login">
+                    <div class="welcome__name">
+                        <div class="welcome__login-item">
+                            <input type="text" placeholder="username">
+                        </div>
+                    </div>
+                    <div class="welcome__password">
+                        <div class="welcome__login-item">
+                            <input type="password" placeholder="password">
+                        </div>
+                    </div>
+                    <button type="submit" class="button-login">login</button>
                 </div>
-            </div>
-            <div class="welcome__password">
-                <div class="welcome__login-item">
-                    <input type="text" placeholder="password">
-                </div>
-            </div>
+            </form>
+            <h3>Don’t have account? <a href="#" class="link-register">Register</a></h3>
         </div>
+
+
 
 
 
@@ -30,4 +39,5 @@
 
 
 </body>
+
 </html>

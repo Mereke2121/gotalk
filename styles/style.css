@@ -3,6 +3,25 @@ body {
     background-repeat: no-repeat;
 }
 
+input {
+    color: #FFFFFF;
+    outline: none;
+    background: none;
+    width: 280px;
+    height: 30px;
+    border: none;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.welcome__container {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .welcome__title {
     font-family: 'Poppins';
     font-style: normal;
@@ -16,7 +35,7 @@ body {
 
 .welcome__login {
     width: 314px;
-    height: 180px;
+    height: 314px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -32,14 +51,55 @@ body {
     align-items: center;
     justify-content: space-evenly;
 }
-input {
-    background: none;
-    width: 280px;
-    height: 30px;
-    border: none;
-    text-align: center;
-}
+
 input::placeholder {
     font-weight: bold;
     color: white;
+}
+
+.button-login {
+    border: none;
+    cursor: pointer;
+    margin: 0 auto;
+    width: 62px;
+    height: 30px;
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+    color: #FFFFFF;
+    width: 127px;
+    height: 47px;
+    background: rgba(0, 60, 255, 0.48);
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 20px;
+    text-transform: uppercase;
+}
+.button-login:hover {
+    background: rgba(0, 60, 255, 0.219);
+}
+
+
+h3 {
+    margin-top: 40px;
+    height: 27px;
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 20px;
+    color: #FFFFFF;
+}
+
+.link-register {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 18px;
+    color: #FFF500;
+    text-decoration: none;
+    margin-left: 4px;
+}
+
+.link-register:hover {
+    color: #fff700ce;
 }

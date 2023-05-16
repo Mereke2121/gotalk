@@ -13,7 +13,7 @@ import (
 // @Param 		 input body models.User true "Authorization"
 // @Success      200  {string}  string
 // @Router       /sign-up [post]
-func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	var user *models.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -39,7 +39,7 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 // @Param        input body models.Authentication true "Authentication"
 // @Success      200  {string} token
 // @Router       /sign-in [post]
-func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 	var user models.Authentication
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {

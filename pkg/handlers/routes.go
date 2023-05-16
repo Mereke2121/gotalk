@@ -15,8 +15,8 @@ func (h *Handler) InitRoutes() http.Handler {
 	mux.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL("http://localhost:8000/swagger/doc.json")))
 
 	// auth
-	mux.Post("/sign-up", h.signUp)
-	mux.Post("/sign-in", h.signIn)
+	mux.Post("/sign-up", h.SignUp)
+	mux.Post("/sign-in", h.SignIn)
 
 	// rooms
 	mux.Get("/room", h.getAllRooms)

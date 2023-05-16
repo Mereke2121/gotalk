@@ -6,6 +6,8 @@ import (
 	"github.com/gotalk/pkg/repository"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
+
 type Authorization interface {
 	AddUser(user *models.User) error
 	Authenticate(user *models.Authentication) (string, error)

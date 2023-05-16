@@ -38,7 +38,6 @@ func main() {
 		return
 	}
 
-	//TODO: add creating this collections
 	userCollection := client.Database("gotalk").Collection("users")
 	roomCollection := client.Database("gotalk").Collection("rooms")
 

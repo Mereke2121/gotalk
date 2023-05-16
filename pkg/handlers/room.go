@@ -3,8 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"github.com/go-chi/chi"
+	utils2 "github.com/gotalk/api/utils"
 	"github.com/gotalk/models"
-	"github.com/gotalk/utils"
 	"go.uber.org/zap"
 	"log"
 	"net/http"
@@ -202,7 +202,7 @@ func verifyUserId(r *http.Request) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	userIdStr, err := utils.VerifyToken(userToken, utils.UserId)
+	userIdStr, err := utils2.VerifyToken(userToken, utils2.UserId)
 	if err != nil {
 		return "", err
 	}

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"github.com/go-chi/chi"
 	"github.com/gorilla/websocket"
+	utils2 "github.com/gotalk/api/utils"
 	"github.com/gotalk/models"
-	"github.com/gotalk/utils"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"net/http"
@@ -125,22 +125,22 @@ func getJWTToken(r *http.Request) (string, error) {
 }
 
 func createToken(roomId int, userId string) (string, error) {
-	jwtFields := []utils.JWTTokenField{
+	jwtFields := []utils2.JWTTokenField{
 		{
-			Type:  utils.RoomId,
+			Type:  utils2.RoomId,
 			Value: roomId,
 		},
 		{
-			Type:  utils.UserId,
+			Type:  utils2.UserId,
 			Value: userId,
 		},
 	}
-	return utils.CreateToken(jwtFields)
+	return utils2.CreateToken(jwtFields)
 }
 
 func authenticate(roomIdHeader int, token string) (string, error) {
 	// get room id
-	roomParam, err := utils.VerifyToken(token, utils.RoomId)
+	roomParam, err := utils2.VerifyToken(token, utils2.RoomId)
 	if err != nil {
 		return "", errors.Wrap(err, "invalid token")
 	}
@@ -154,7 +154,7 @@ func authenticate(roomIdHeader int, token string) (string, error) {
 	}
 
 	// get user id
-	userIdParam, err := utils.VerifyToken(token, utils.UserId)
+	userIdParam, err := utils2.VerifyToken(token, utils2.UserId)
 	if err != nil {
 		return "", errors.Wrap(err, "invalid token")
 	}

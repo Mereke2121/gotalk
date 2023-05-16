@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/gotalk/models"
+	"github.com/gotalk/api/models"
 	"go.uber.org/zap"
 	"net/http"
 )

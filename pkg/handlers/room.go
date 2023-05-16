@@ -3,8 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"github.com/go-chi/chi"
+	"github.com/gotalk/api/models"
 	utils2 "github.com/gotalk/api/utils"
-	"github.com/gotalk/models"
 	"go.uber.org/zap"
 	"log"
 	"net/http"

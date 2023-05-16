@@ -4,8 +4,8 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"github.com/gotalk/api/models"
 	utils2 "github.com/gotalk/api/utils"
-	"github.com/gotalk/models"
 	"github.com/gotalk/pkg/repository"
 	"log"
 )

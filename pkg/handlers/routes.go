@@ -5,7 +5,7 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"net/http"
 
-	_ "github.com/gotalk/docs"
+	_ "github.com/gotalk/api/docs"
 )
 
 func (h *Handler) InitRoutes() http.Handler {

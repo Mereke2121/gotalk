@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/gotalk/models"
+	"github.com/gotalk/api/models"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

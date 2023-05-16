@@ -2,7 +2,7 @@ package services
 
 import (
 	"github.com/gorilla/websocket"
-	"github.com/gotalk/models"
+	"github.com/gotalk/api/models"
 	"github.com/gotalk/pkg/repository"
 )
 

@@ -2,7 +2,8 @@ package repository
 
 import (
 	"context"
-	"github.com/gotalk/api/models"
+
+	"github.com/gotalk/models"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

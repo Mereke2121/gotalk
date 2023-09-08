@@ -9,7 +9,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	websocket "github.com/gorilla/websocket"
-	models "github.com/gotalk/api/models"
+	models "github.com/gotalk/models"
 )
 
 // MockAuthorization is a mock of Authorization interface.

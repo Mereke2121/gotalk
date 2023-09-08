@@ -2,13 +2,14 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/go-chi/chi"
-	"github.com/gotalk/api/models"
-	utils2 "github.com/gotalk/api/utils"
-	"go.uber.org/zap"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi"
+	"github.com/gotalk/models"
+	utils "github.com/gotalk/utils"
+	"go.uber.org/zap"
 )
 
 // @Summary      Create Room
@@ -202,7 +203,7 @@ func verifyUserId(r *http.Request) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	userIdStr, err := utils2.VerifyToken(userToken, utils2.UserId)
+	userIdStr, err := utils.VerifyToken(userToken, utils.UserId)
 	if err != nil {
 		return "", err
 	}

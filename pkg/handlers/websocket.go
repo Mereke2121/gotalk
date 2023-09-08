@@ -2,14 +2,15 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/go-chi/chi"
-	"github.com/gorilla/websocket"
-	"github.com/gotalk/api/models"
-	utils2 "github.com/gotalk/api/utils"
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi"
+	"github.com/gorilla/websocket"
+	"github.com/gotalk/models"
+	utils "github.com/gotalk/utils"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 // @Summary      Ws connection with chat room
@@ -125,22 +126,22 @@ func getJWTToken(r *http.Request) (string, error) {
 }
 
 func createToken(roomId int, userId string) (string, error) {
-	jwtFields := []utils2.JWTTokenField{
+	jwtFields := []utils.JWTTokenField{
 		{
-			Type:  utils2.RoomId,
+			Type:  utils.RoomId,
 			Value: roomId,
 		},
 		{
-			Type:  utils2.UserId,
+			Type:  utils.UserId,
 			Value: userId,
 		},
 	}
-	return utils2.CreateToken(jwtFields)
+	return utils.CreateToken(jwtFields)
 }
 
 func authenticate(roomIdHeader int, token string) (string, error) {
 	// get room id
-	roomParam, err := utils2.VerifyToken(token, utils2.RoomId)
+	roomParam, err := utils.VerifyToken(token, utils.RoomId)
 	if err != nil {
 		return "", errors.Wrap(err, "invalid token")
 	}
@@ -154,7 +155,7 @@ func authenticate(roomIdHeader int, token string) (string, error) {
 	}
 
 	// get user id
-	userIdParam, err := utils2.VerifyToken(token, utils2.UserId)
+	userIdParam, err := utils.VerifyToken(token, utils.UserId)
 	if err != nil {
 		return "", errors.Wrap(err, "invalid token")
 	}

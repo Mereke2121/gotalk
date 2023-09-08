@@ -2,16 +2,17 @@ package handlers
 
 import (
 	"bytes"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/go-chi/chi"
 	"github.com/golang/mock/gomock"
-	"github.com/gotalk/api/models"
+	"github.com/gotalk/models"
 	services "github.com/gotalk/pkg/services"
 	mock_services "github.com/gotalk/pkg/services/mocks"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestHandler_SignUp(t *testing.T) {

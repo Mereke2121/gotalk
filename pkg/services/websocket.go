@@ -2,8 +2,9 @@ package services
 
 import (
 	"fmt"
-	"github.com/gorilla/websocket"
 	"log"
+
+	"github.com/gorilla/websocket"
 )
 
 type WebsocketService struct {

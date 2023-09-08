@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
-	"github.com/gotalk/api/server"
+	"log"
+
 	"github.com/gotalk/pkg/handlers"
 	"github.com/gotalk/pkg/repository"
 	"github.com/gotalk/pkg/services"
+	"github.com/gotalk/server"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
-	"log"
 )
 
 // @title 			Gotalk API

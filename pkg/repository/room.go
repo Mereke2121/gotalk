@@ -2,7 +2,8 @@ package repository
 
 import (
 	"context"
-	"github.com/gotalk/api/models"
+
+	"github.com/gotalk/models"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,7 +22,9 @@ func NewRoomRepository(roomCollection *mongo.Collection) *RoomRepository {
 
 func (r *RoomRepository) AddRoom(input *models.Room) (int, error) {
 	indexModel := mongo.IndexModel{
-		Keys:    bson.D{{"roomid", 1}},
+		Keys: bson.D{
+			{"roomid", 1},
+		},
 		Options: options.Index().SetUnique(true),
 	}
 

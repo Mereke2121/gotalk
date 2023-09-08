@@ -1,7 +1,7 @@
 package services
 
 import (
-	"github.com/gotalk/api/models"
+	"github.com/gotalk/models"
 	"github.com/gotalk/pkg/repository"
 	"github.com/pkg/errors"
 )

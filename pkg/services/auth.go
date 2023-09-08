@@ -4,10 +4,11 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/gotalk/api/models"
-	utils2 "github.com/gotalk/api/utils"
-	"github.com/gotalk/pkg/repository"
 	"log"
+
+	"github.com/gotalk/models"
+	"github.com/gotalk/pkg/repository"
+	utils "github.com/gotalk/utils"
 )
 
 var salt = "39@#$rkf@dk!dwk$#"
@@ -51,12 +52,12 @@ func (s *AuthService) Authenticate(user *models.Authentication) (string, error) 
 	log.Println("user id: ", id)
 
 	// create jwt token and return in
-	var jwtFields []utils2.JWTTokenField
-	jwtFields = append(jwtFields, utils2.JWTTokenField{
-		Type:  utils2.UserId,
+	var jwtFields []utils.JWTTokenField
+	jwtFields = append(jwtFields, utils.JWTTokenField{
+		Type:  utils.UserId,
 		Value: id,
 	})
-	return utils2.CreateToken(jwtFields)
+	return utils.CreateToken(jwtFields)
 }
 
 func (s *AuthService) GetUserById(userId string) (*models.User, error) {

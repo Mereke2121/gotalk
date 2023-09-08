@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/gotalk/api/models"
-	"go.uber.org/zap"
 	"net/http"
+
+	"github.com/gotalk/models"
+	"go.uber.org/zap"
 )
 
 // @Summary      Sign up
